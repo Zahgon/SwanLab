@@ -25,6 +25,4 @@ def write_config(path: Path, config: dict, sort_map: dict) -> None:
     :param config:   内部存储的原始 {key: value} dict（value 已经过 parse()）
     :param sort_map: key → sort index 映射，用于还原插入顺序
     """
-    formatted = {key: {"value": value, "desc": "", "sort": sort_map.get(key, 0)} for key, value in config.items()}
-    content = yaml.safe_dump(formatted, allow_unicode=True, default_flow_style=False)
-    fs.safe_write(path, content)
+    pass

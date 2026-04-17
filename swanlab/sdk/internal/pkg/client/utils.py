@@ -17,10 +17,7 @@ def decode_response(resp: requests.Response) -> Union[Dict, List, str]:
     """
     解码响应，合并异常捕获
     """
-    try:
-        return resp.json()
-    except (json.decoder.JSONDecodeError, requests.JSONDecodeError):
-        return resp.text
+    pass
 
 
 @safe.decorator(message=None)
@@ -33,17 +30,4 @@ def decode_error_response(resp: requests.Response) -> Optional[Tuple[str, str]]:
     :return: (code, message) 元组。如果解析失败则返回 None
     """
     # 如果响应体为空，提前结束
-    if not resp.text.strip():
-        return None
-
-    data = resp.json()
-
-    # 确保后端返回的是字典格式，并且包含了我们需要的键
-    if isinstance(data, dict):
-        # 即使后端没有严格同时返回 code 和 message，只要有其中之一也可以尽量提取
-        # 提取不到的可以用原生的 status_code 和 reason 补位
-        code = str(data.get("code", resp.status_code))
-        message = str(data.get("message", resp.reason))
-        return code, message
-
-    return None
+    pass

@@ -45,12 +45,7 @@ class RunConfig:
 # 上下文宿主
 class RunContext:
     def __init__(self, config: RunConfig):
-        self.config: RunConfig = config
-        self.callbacker = create_callback_manager()
-        # 使用 callbacker.registered_callbacks 作为初始回调集合
-        self.callbacker.merge_callbacks(callbacker.registered_callbacks)
-        self.metrics: RunMetrics = RunMetrics()
-        self.core = create_core(self)
+        pass
 
     @cached_property
     def run_dir(self) -> Path:
@@ -106,10 +101,7 @@ def get_context() -> RunContext:
 
     若上下文未初始化则抛出RuntimeError。
     """
-    ctx = _current_ctx.get()
-    if ctx is None:
-        raise RuntimeError("SwanLab Context is not initialized.")
-    return ctx
+    pass
 
 
 @contextmanager
@@ -121,15 +113,4 @@ def use_context(ctx: RunContext) -> Generator[RunContext, None, None]:
     退出行为：无论是否发生异常，离开 with 块时都会自动清空上下文。
     """
     # 1. 严格检查：如果已经存在上下文，直接拦截报错
-    if _current_ctx.get() is not None:
-        raise RuntimeError("SwanLab Context is already active. Cannot nest or overwrite temp contexts.")
-
-    # 2. 前置操作：设置上下文
-    _current_ctx.set(ctx)
-
-    try:
-        # 3. 交出执行权，并把 ctx yield 出去，方便外部直接用 `as` 接收
-        yield ctx
-    finally:
-        # 4. 最终清理（回退）：无论业务代码报什么错，绝对保证上下文被清空，不会污染全局 ContextVar
-        _current_ctx.set(None)
+    pass

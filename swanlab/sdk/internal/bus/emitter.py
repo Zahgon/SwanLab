@@ -33,7 +33,7 @@ class RunEmitter(EmitterProtocol):
     """
 
     def __init__(self, maxsize: int = 100_000):
-        self._queue: RunQueue = RunQueue(maxsize=maxsize)
+        pass
 
     @property
     def queue(self) -> RunQueue:
@@ -42,4 +42,4 @@ class RunEmitter(EmitterProtocol):
 
     def emit(self, event: EventPayload) -> None:
         """将事件推入队列，背压时阻塞调用方"""
-        self._queue.put(event, block=True)
+        pass

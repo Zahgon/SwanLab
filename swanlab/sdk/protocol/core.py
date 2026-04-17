@@ -30,7 +30,7 @@ class CoreProtocol(ABC):
     """
 
     def __init__(self, ctx: "RunContext"):
-        self._ctx = ctx
+        pass
 
     @abstractmethod
     def start(self, start_request: StartRequest) -> StartResponse:

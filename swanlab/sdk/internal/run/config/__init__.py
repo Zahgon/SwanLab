@@ -67,16 +67,7 @@ class Config(MutableMapping):
 
     def __init__(self) -> None:
         # 直接操作 __dict__ 绕过自定义 __setattr__
-        self.__dict__.update(
-            {
-                "_config": {},  # {key: parsed_value}
-                "_sort": {},  # {key: sort_index}
-                "_seq": 0,  # 下一个 sort 序号
-                "_file": None,  # Path | None
-                "_emit": None,  # Callable | None
-                "_bound": False,  # 是否已绑定
-            }
-        )
+        pass
 
     # ------------------------------------------------------------------
     # 内部辅助（NOT 线程安全，调用方须持锁）
@@ -84,19 +75,11 @@ class Config(MutableMapping):
 
     def _set_value(self, key: str, value: Any) -> None:
         """解析并写入单个 key，自动维护 sort 序号。"""
-        is_new = key not in self._config
-        self._config[key] = parse(value)
-        if is_new:
-            self._sort[key] = self._seq
-            self.__dict__["_seq"] = self._seq + 1
+        pass
 
     def _flush(self, update_type: UpdateType) -> None:
         """全量写文件并发出 ConfigEvent。"""
-        assert self._file is not None and self._emit is not None, "Config not bound"
-        write_config(self._file, self._config, self._sort)
-        ts = Timestamp()
-        ts.GetCurrentTime()
-        self._emit(ConfigEvent(update=update_type, timestamp=ts))
+        pass
 
     # ------------------------------------------------------------------
     # 绑定 / 重置（线程安全）
@@ -126,60 +109,36 @@ class Config(MutableMapping):
     # ------------------------------------------------------------------
 
     def __setitem__(self, key: str, value: Any) -> None:
-        with _lock:
-            self._set_value(str(key), value)
-            if self._bound:
-                self._flush(UpdateType.UPDATE_TYPE_PATCH)
+        pass
 
     def __getitem__(self, key: str) -> Any:
-        if not isinstance(key, str):
-            raise TypeError(f"Key must be a string, got {type(key).__name__}")
-        try:
-            return self._config[key]
-        except KeyError:
-            raise KeyError(key)
+        pass
 
     def __delitem__(self, key: str) -> None:
-        with _lock:
-            if key not in self._config:
-                raise KeyError(key)
-            del self._config[key]
-            self._sort.pop(key, None)
-            if self._bound:
-                self._flush(UpdateType.UPDATE_TYPE_PATCH)
+        pass
 
     def __iter__(self):
-        return iter(self._config)
+        pass
 
     def __len__(self) -> int:
-        return len(self._config)
+        pass
 
     def __str__(self) -> str:
-        return str(self._config)
+        pass
 
     # ------------------------------------------------------------------
     # 对象属性风格
     # ------------------------------------------------------------------
 
     def __setattr__(self, name: str, value: Any) -> None:
-        if _PRIVATE_RE.match(name):
-            raise AttributeError(f"Attribute '{name}' is private and cannot be set")
-        self[name] = value
+        pass
 
     def __getattr__(self, name: str) -> Any:
         # 仅在正常属性查找失败时调用；私有字段由 object.__getattribute__ 直接处理
-        try:
-            return self._config[name]
-        except KeyError:
-            raise AttributeError(name)
+        pass
 
     def __delattr__(self, name: str) -> None:
-        if _PRIVATE_RE.match(name):
-            raise AttributeError(f"Attribute '{name}' is private and cannot be deleted")
-        try:
-            del self[name]
-        except KeyError:
-            raise AttributeError(name)
+        pass
 
     # ------------------------------------------------------------------
     # 批量操作（一次 flush）
@@ -196,14 +155,7 @@ class Config(MutableMapping):
             >>> config.update({"lr": 0.01, "epochs": 100})
             >>> config.update(lr=0.01, batch_size=32)
         """
-        with _lock:
-            if __m is not None:
-                for k, v in parse(__m).items():
-                    self._set_value(k, v)
-            for k, v in kwargs.items():
-                self._set_value(k, v)
-            if self._bound:
-                self._flush(UpdateType.UPDATE_TYPE_PATCH)
+        pass
 
     # ------------------------------------------------------------------
     # 覆盖 MutableMapping 默认实现（避免多余的 flush）
@@ -223,7 +175,7 @@ class Config(MutableMapping):
             >>> config.get("missing_key", "default_value")
             'default_value'
         """
-        return self._config.get(key, default)
+        pass
 
     def set(self, name: str, value: Any) -> None:
         """
@@ -253,16 +205,7 @@ class Config(MutableMapping):
             >>> config.pop("missing_key", "default")
             'default'
         """
-        with _lock:
-            if key not in self._config:
-                if args:
-                    return args[0]
-                raise KeyError(key)
-            value = self._config.pop(key)
-            self._sort.pop(key, None)
-            if self._bound:
-                self._flush(UpdateType.UPDATE_TYPE_PATCH)
-            return value
+        pass
 
     def clean(self) -> None:
         """
@@ -291,34 +234,34 @@ class _ConfigProxy:
         pass
 
     def __getitem__(self, key):
-        return self._target[key]
+        pass
 
     def __setitem__(self, key, value):
-        self._target[key] = value
+        pass
 
     def __delitem__(self, key):
-        del self._target[key]
+        pass
 
     def __iter__(self):
-        return iter(self._target)
+        pass
 
     def __len__(self):
-        return len(self._target)
+        pass
 
     def __contains__(self, key):
-        return key in self._target
+        pass
 
     def __str__(self):
-        return str(self._target)
+        pass
 
     def __getattr__(self, name):
-        return getattr(self._target, name)
+        pass
 
     def __setattr__(self, name, value):
-        setattr(self._target, name, value)
+        pass
 
     def __delattr__(self, name):
-        delattr(self._target, name)
+        pass
 
 
 _global_config = Config()
@@ -340,33 +283,19 @@ else:
 
 def create_run_config(config_file: Path, emit: Callable) -> Config:
     """从 global config 创建并绑定 per-run config，激活代理。"""
-    global _active_run_config
-    run_cfg = Config()
-    getattr(run_cfg, "_copy_from")(_global_config)
-    getattr(run_cfg, "_bindctx")(config_file, emit)
-    _active_run_config = run_cfg
-    return run_cfg
+    pass
 
 
 def create_unbound_run_config() -> Config:
     """disabled 模式：从 global config 创建不绑定文件的 run config，激活代理。"""
-    global _active_run_config
-    run_cfg = Config()
-    getattr(run_cfg, "_copy_from")(_global_config)
-    _active_run_config = run_cfg
-    return run_cfg
+    pass
 
 
 def deactivate_run_config() -> None:
     """run 结束：清理 run config 内存，代理恢复指向 global config。"""
-    global _active_run_config
-    if _active_run_config is not None:
-        getattr(_active_run_config, "_reset")()
-        _active_run_config = None
+    pass
 
 
 def reset() -> None:
     """重置 global config + 取消激活（仅用于测试隔离）。"""
-    global _active_run_config
-    getattr(_global_config, "_reset")()
-    _active_run_config = None
+    pass

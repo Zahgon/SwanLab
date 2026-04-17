@@ -106,40 +106,7 @@ class Run:
 
     def __init__(self, ctx: RunContext):
         # 1. 基础状态、组件准备
-        self._ctx = ctx
-        self._state: Union[FinishType, Literal["running"]] = "running"
-        self._pid = os.getpid()
-        # 外部API锁，防止并发调用
-        self._api_lock = threading.RLock()
-        # 异步任务管理器：处理async_log任务
-        self._async_task_manager = AsyncTaskManager()
-        # 运行时组件
-        self._builder = RecordBuilder(self._ctx)
-        self._emitter = factory_emitter(self._ctx)
-        self._config = factory_config(self._ctx, self._emitter)
-        self._consumer = factory_consumer(self._ctx, self._emitter, self._builder)
-        # self._monitor is not None 则代表硬件监控开启
-        self._monitor: Optional[system.Monitor] = None
-
-        # 2. 注册副作用
-        # 设置全局运行实例
-        set_run(self)
-        # 注册退出钩子
-        self._sys_origin_excepthook = sys.excepthook
-        atexit.register(self._handle_atexit)
-        sys.excepthook = self._handle_except
-        # 注册 SIGINT handler，确保 Ctrl+C 能可靠地将实验标记为 aborted，sys.excepthook 在主线程阻塞于 C 扩展时可能无法触发
-        self._original_sigint_handler = signal.getsignal(signal.SIGINT)
-        signal.signal(signal.SIGINT, self._handle_sigint)
-
-        # 3. 初始化完成
-        # 启动硬件监控
-        self._monitor = factory_monitor(self._ctx, self._emitter)
-        # 启动后台消费者
-        self._consumer.start()
-        # 绑定日志文件
-        if self.mode != "disabled":
-            log.bindfile(self._ctx.debug_dir)
+        pass
 
     # ----------------------------------
     # 私有钩子
@@ -207,8 +174,7 @@ class Run:
 
         :return: Run path
         """
-        settings = self._ctx.config.settings
-        return f"/{settings.project.name}/runs/{settings.run.id}"
+        pass
 
     @cached_property
     def url(self) -> Optional[str]:
@@ -220,7 +186,7 @@ class Run:
 
     @cached_property
     def config(self) -> Config:
-        return self._config
+        pass
 
     @property
     def _forked(self) -> bool:
@@ -247,14 +213,10 @@ class Run:
     # 上下文管理器，允许用户以 with 语句启动和结束运行
     # ----------------------------------
     def __enter__(self) -> "Run":
-        return self
+        pass
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
-        if exc_type is not None:
-            full_error = "".join(traceback.format_exception(exc_type, exc_val, exc_tb))
-            self.finish(state="aborted" if exc_type is KeyboardInterrupt else "crashed", error=full_error)
-        else:
-            self.finish()
+        pass
 
     # ----------------------------------
     # 公开 API：只负责验证输入并发事件
@@ -267,33 +229,11 @@ class Run:
 
         :param step: Optional step index. If None, the step is auto-incremented.
         """
-        self._log_impl(data, step)
+        pass
 
     def _log_impl(self, data: Mapping[str, Any], step: Optional[int] = None):
         """log 的无锁内部实现，供 async_log 回调调用以避免与 finish() 的 _api_lock 死锁。"""
-        if not (this_data := fmt.safe_validate_log_data(data)):
-            console.error(f"Log data must be a dict, but got {type(data).__name__}. SwanLab will ignore this log.")
-            return
-        if step is not None:
-            if not isinstance(step, int):
-                console.error(
-                    f"Step must be an integer or None, but got {type(step).__name__}. SwanLab will ignore this log."
-                )
-                return
-            if step < 0:
-                console.error(f"Step must be non-negative, but got {step}. SwanLab will ignore this log.")
-                return
-
-        next_step = self._ctx.metrics.next_step(step)
-
-        ts = Timestamp()
-        ts.GetCurrentTime()
-
-        # 展平字典并在内部进行合规性验证和截断
-        flatten_data = fmt.flatten_dict(this_data)
-
-        # 推送日志事件
-        self._emitter.emit(MetricLogEvent(data=flatten_data, step=next_step, timestamp=ts))
+        pass
 
     @with_api("run.async_log()")
     def async_log(
@@ -371,20 +311,7 @@ class Run:
             ...     return {"value": t.item(), "arr": t.detach().cpu().numpy()}
             >>> future = run.async_log(compute, step=3, mode="spawn")
         """
-        if mode == "fork":
-            raise NotImplementedError(
-                "fork mode is not yet supported, please looking forward to the `swanlab-core` release"
-            )
-
-        return self._async_task_manager.submit(
-            func,
-            args=args,
-            kwargs=kwargs,
-            step=step,
-            mode=mode,
-            on_success=lambda result, s: self._log_impl(result, step=s),
-            on_error=lambda: console.trace("swanlab.async_log run error"),
-        )
+        pass
 
     @with_api("run.log_scalar()")
     def log_scalar(self, *, key: str, value: Union[float, int], step: Optional[int] = None):
@@ -407,8 +334,7 @@ class Run:
         :param caption: Optional caption for the text data.
         :param step: Optional step for the text data.
         """
-        normalized_data = normalize_media_input(Text, data, caption=caption)
-        self.log({key: normalized_data}, step=step)
+        pass
 
     @with_api("run.log_image()")
     def log_image(
@@ -433,8 +359,7 @@ class Run:
         :param size: Resize policy.
         :param step: Optional step for the image data.
         """
-        normalized_data = normalize_media_input(Image, data, mode=mode, caption=caption, size=size, file_type=file_type)
-        self.log({key: normalized_data}, step=step)
+        pass
 
     @with_api("run.log_audio()")
     def log_audio(
@@ -455,8 +380,7 @@ class Run:
         :param caption: Optional caption for the audio data.
         :param step: Optional step for the audio data.
         """
-        normalized_data = normalize_media_input(Audio, data, caption=caption, sample_rate=sample_rate)
-        self.log({key: normalized_data}, step=step)
+        pass
 
     @with_api("run.log_video()")
     def log_video(
@@ -475,8 +399,7 @@ class Run:
         :param caption: Optional caption for the video data.
         :param step: Optional step for the video data.
         """
-        normalized_data = normalize_media_input(Video, data, caption=caption)
-        self.log({key: normalized_data}, step=step)
+        pass
 
     @with_api("run.define_scalar()")
     def define_scalar(
@@ -498,37 +421,7 @@ class Run:
         :param chart_name: Optional chart name to group the column into.
         """
         # TODO: 实现 glob 匹配逻辑
-        if not (this_key := fmt.safe_validate_key(key)):
-            return console.error(
-                f"Invalid key for define scalar: {key}, please use valid characters (alphanumeric, '.', '-', '/') and avoid special characters."
-            )
-
-        original_name = name
-        if name and not (name := fmt.safe_validate_name(name)):
-            return console.error(f"Invalid name for define scalar: {original_name}, must be a string.")
-
-        original_color = color
-        if color and not (color := fmt.safe_validate_color(color)):
-            return console.error(f"Invalid color for define scalar: {original_color}, must be a hex color code.")
-
-        if (this_x_axis := fmt.safe_validate_x_axis(x_axis)) is None:
-            return console.error(f"Invalid x_axis for define scalar: {x_axis}, must be a valid ScalarXAxisType.")
-
-        original_chart_name = chart_name
-        if chart_name and not (chart_name := fmt.safe_validate_chart_name(chart_name)):
-            return console.error(f"Invalid chart_name for define scalar: {original_chart_name}, must be a string.")
-
-        self._emitter.emit(
-            ScalarDefineEvent(
-                key=this_key,
-                name=name,
-                color=color,
-                system=False,
-                x_axis=this_x_axis,
-                chart_name=chart_name,
-                chart=None,
-            )
-        )
+        pass
 
     @with_api("run.finish()", must_alive=False)
     def finish(
@@ -545,54 +438,7 @@ class Run:
         """
         # 1. 状态校验
         # 有时执行finish也有可能是系统hook主动调用，此时无需再次打印警告，如果在finishing状态，也忽略
-        if not self.alive:
-            return
-        state = state.lower()  # type: ignore
-        if not (this_state := fmt.safe_validate_state(cast(FinishType, state))):
-            console.error(f"Invalid state: {state}, allowed values are {get_args(FinishType)}")
-            return
-        if state == "crashed" and error is None:
-            console.warning("Crashed reason has been set to 'unknown' due to missing error message.")
-            error = "unknown"
-        # 2. 运行结束前，结束其他依赖于运行实例的线程
-        # 2.1 等待所有 async_log 任务完成
-        console.debug("Waiting for async_log tasks to complete...")
-        self._async_task_manager.shutdown(timeout=async_log_timeout)
-        # 2.2 停止硬件监控
-        if self._monitor is not None:
-            console.debug("Stopping hardware monitor...")
-            self._monitor.stop()
-
-        # 3. 运行结束
-        self._state = this_state
-        # 停止时间
-        ts = Timestamp()
-        ts.GetCurrentTime()
-        # 3.1 TODO: goodbye message
-
-        # 3.2 TODO: 停止终端代理
-
-        # 3.3 停止消费者线程
-        console.debug("SwanLab Run is finishing, waiting for logs to flush...")
-        self._consumer.stop()
-        self._consumer.join()
-        # 3.4 停止Core线程
-        finish_resp = self._ctx.core.finish(FinishRequest(state=adapter.state[this_state], error=error, finished_at=ts))
-        if not finish_resp.success:
-            console.error("Failed to finish run with error:", finish_resp.message)
-        console.debug(f"SwanLab Run has finished with state: {self._state}, cleanup...")
-        # 3.5 清理副作用
-        console.debug("Cleanup system hook...")
-        atexit.unregister(self._handle_atexit)
-        sys.excepthook = self._sys_origin_excepthook
-        signal.signal(signal.SIGINT, self._original_sigint_handler)
-        # 清理全局运行实例
-        console.debug("Cleanup global instance...")
-        clear_run()
-        deactivate_run_config()
-        console.debug("Clean & tidy! ciallo ( ∠・ω< ) ~ ★")
-        # 释放日志，本次运行结束
-        log.reset()
+        pass
 
 
 _current_run: Optional[Run] = None
@@ -613,7 +459,7 @@ def has_run() -> bool:
         ... else:
         ...     print("No active run")
     """
-    return _current_run is not None and _current_run.alive
+    pass
 
 
 def get_run() -> Run:
@@ -633,16 +479,12 @@ def get_run() -> Run:
         >>> print(run.id)
         >>> swanlab.finish()
     """
-    if _current_run is None:
-        raise RuntimeError("No active Run. Call swanlab.init() first.")
-    return _current_run
+    pass
 
 
 def set_run(run: Run) -> None:
-    global _current_run
-    _current_run = run
+    pass
 
 
 def clear_run() -> None:
-    global _current_run
-    _current_run = None
+    pass

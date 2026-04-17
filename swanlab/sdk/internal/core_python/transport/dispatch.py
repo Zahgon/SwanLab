@@ -34,24 +34,11 @@ class Dispatch:
         upload_callback: Optional[Callable[[int], None]] = None,
         sender: Optional[HttpRecordSender] = None,
     ):
-        self._upload_callback = upload_callback
-        self._sender = sender
+        pass
 
     def __call__(self, records: List[Record]) -> Tuple[bool, List[Record]]:
         """按 record_type 聚合并上传，返回 (是否成功, 失败及未处理的 records)。"""
-        records_by_type = group_records_by_type(records)
-        record_types = list(records_by_type.keys())
-
-        for index, record_type in enumerate(record_types):
-            success, remaining_records = self._upload_record_type(record_type, records_by_type[record_type])
-            if not success:
-                unprocessed_records = [
-                    record
-                    for next_record_type in record_types[index + 1 :]
-                    for record in records_by_type[next_record_type]
-                ]
-                return False, remaining_records + unprocessed_records
-        return True, []
+        pass
 
     def _upload_record_type(self, record_type: str, records: List[Record]) -> Tuple[bool, List[Record]]:
         """上传单个 record_type 分组，返回 (是否成功, 当前分组剩余的 records)。"""

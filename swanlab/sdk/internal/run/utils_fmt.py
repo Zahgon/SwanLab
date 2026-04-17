@@ -26,32 +26,7 @@ def flatten_dict(
     :return: 展开后的字典
     """
     # 顶层调用时初始化字典（避免可变默认参数陷阱）
-    if parent_dict is None:
-        parent_dict = {}
-
-    for k, v in d.items():
-        # 防御性编程：用户可能会传非字符串的 key（比如整数），强制转为 str
-        k_str = str(k)
-        new_key = f"{parent_key}/{k_str}" if parent_key else k_str
-
-        if isinstance(v, Mapping):
-            # 递归调用，将同一个 parent_dict 引用传递下去
-            flatten_dict(v, new_key, parent_dict)
-        else:
-            # 如果清洗后变成空字符串（比如用户传了 {"///": 1}），丢弃这个字段
-            with safe.block(message="SwanLab dropped an invalid metric"):
-                # 对完整拼接后的路径进行最终的合法性校验、字符替换与截断
-                safe_key = validate_key(new_key)
-                # 检查冲突并警告
-                if safe_key in parent_dict:
-                    console.warning(
-                        f"Duplicate key found after sanitization: '{safe_key}'. "
-                        "The latter value will overwrite the former one."
-                    )
-                # 赋值
-                parent_dict[safe_key] = v
-
-    return parent_dict
+    pass
 
 
 # 全局警告缓存池，保证相同的非法 key 在同一进程中只警告一次
@@ -70,39 +45,7 @@ def validate_key(key: str, max_len: int = 255) -> str:
     :raises ValueError: 如果清洗后为空字符串或者无法通过 MetricKey 校验
     """
     # 宽容处理类型：如果是 int/float，直接转 str，不抛异常
-    if not isinstance(key, str):
-        key = str(key)
-
-    max_len = min(max_len, 255)
-
-    original_key = key
-
-    # 剥离头尾的空白字符、'.' 和 '/'
-    key = key.strip(" \t\n\r./")
-
-    if not key:
-        # 只有在清洗后完全为空这种极端且无法挽救的情况下，才抛出异常
-        raise ValueError(
-            f"SwanLab key: '{original_key}' is invalid or empty after sanitization, please use valid characters and avoid leading/trailing special characters."
-        )
-
-    # 长度截断
-    if len(key) > max_len:
-        key = key[:max_len]
-
-    # 友好提示（仅因头尾剥离或截断而改变）
-    if key != original_key:
-        if original_key not in _WARNED_KEYS:
-            console.warning(
-                f"Key '{original_key}' has been trimmed to '{key}', due to leading/trailing characters or length exceeding limit."
-            )
-            _WARNED_KEYS.add(original_key)
-
-    # 使用 MetricKey 约束做最终校验；内部含控制字符等非法内容时直接抛出，不做替换
-    try:
-        return constraints.ta_metric_key.validate_python(key)
-    except ValidationError as e:
-        raise ValueError(str(e)) from e
+    pass
 
 
 def safe_validate_log_data(data: Mapping[str, Any]) -> Optional[Mapping[str, Any]]:
@@ -112,9 +55,7 @@ def safe_validate_log_data(data: Mapping[str, Any]) -> Optional[Mapping[str, Any
     :param data: 待检查的日志数据
     :return: 清洗后的日志数据或 None
     """
-    if not isinstance(data, Mapping):
-        return None
-    return data
+    pass
 
 
 def safe_validate_key(key: str) -> Optional[str]:
@@ -124,10 +65,7 @@ def safe_validate_key(key: str) -> Optional[str]:
     :param key: 待检查的键名
     :return: 合法的键名或 None
     """
-    try:
-        return constraints.ta_metric_key.validate_python(key)
-    except ValidationError:
-        return None
+    pass
 
 
 def safe_validate_name(name: Optional[str]) -> Optional[str]:
@@ -137,12 +75,7 @@ def safe_validate_name(name: Optional[str]) -> Optional[str]:
     :param name: 待检查的指标名称
     :return: 清洗后的指标名称或 None
     """
-    if name is None:
-        return None
-    try:
-        return constraints.ta_label.validate_python(name)
-    except ValidationError:
-        return None
+    pass
 
 
 def safe_validate_chart_name(name: Optional[str]) -> Optional[str]:
@@ -152,12 +85,7 @@ def safe_validate_chart_name(name: Optional[str]) -> Optional[str]:
     :param name: 待检查的图表名称
     :return: 清洗后的图表名称或 None
     """
-    if name is None:
-        return None
-    try:
-        return constraints.ta_chart_name.validate_python(name)
-    except ValidationError:
-        return None
+    pass
 
 
 def safe_validate_x_axis(x_axis: Optional[ScalarXAxisType]) -> Optional[ScalarXAxisType]:
@@ -167,9 +95,7 @@ def safe_validate_x_axis(x_axis: Optional[ScalarXAxisType]) -> Optional[ScalarXA
     :param x_axis: 待检查的 x 轴指标名称
     :return: 清洗后的 x 轴指标名称或 None
     """
-    if x_axis is None:
-        x_axis = "_step"
-    return safe_validate_key(x_axis)
+    pass
 
 
 def safe_validate_color(color: Optional[str]) -> Optional[str]:
@@ -179,12 +105,7 @@ def safe_validate_color(color: Optional[str]) -> Optional[str]:
     :param color: 待检查的颜色字符串
     :return: 清洗后的颜色字符串或 None
     """
-    if color is None:
-        return None
-    try:
-        return constraints.ta_hex_color.validate_python(color)
-    except ValidationError:
-        return None
+    pass
 
 
 def safe_validate_state(state: FinishType) -> Optional[FinishType]:
@@ -194,6 +115,4 @@ def safe_validate_state(state: FinishType) -> Optional[FinishType]:
     :param state: 待检查的运行结束状态
     :return: 清洗后的运行结束状态或 None
     """
-    if state not in get_args(FinishType):
-        return None
-    return state
+    pass

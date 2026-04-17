@@ -31,8 +31,7 @@ class CollectorProtocol(ABC):
     """
 
     def __init__(self, shim: SystemShim):
-        self._shim = shim
-        self._handlers: List[Tuple[str, Callable[[], Union[int, float]]]] = []
+        pass
 
     def collect(self) -> List[CollectResult]:
         pass

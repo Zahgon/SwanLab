@@ -41,56 +41,32 @@ class Timer:
         immediate: bool = False,
         name: str = "SwanLab·Timer",
     ) -> None:
-        self._task = task
-        self._interval = interval
-        self._immediate = immediate
-        self._name = name
-
-        self._lock = threading.Lock()
-        self._stop_event = threading.Event()
-        self._thread: Optional[threading.Thread] = None
-        self._count = 0
-
-        if not callable(interval):
-            self._normalize_interval(interval)
+        pass
 
     def start(self) -> "Timer":
         """
         启动定时器。若当前已在运行，则只告警并返回自身。
         """
-        with self._lock:
-            if self._thread is not None and self._thread.is_alive():
-                console.debug("Timer already running")
-                return self
-
-            self._stop_event.clear()
-            self._thread = threading.Thread(target=self._loop, name=self._name, daemon=True)
-            self._thread.start()
-
-        return self
+        pass
 
     def run(self) -> "Timer":
         """
         兼容旧接口，等价于 start()。
         """
-        return self.start()
+        pass
 
     def cancel(self) -> None:
         """
         发出停止信号。
         当前正在执行的任务不会被中断，但后续轮次不会再被调度。
         """
-        self._stop_event.set()
+        pass
 
     def join(self, timeout: Optional[float] = None) -> None:
         """
         等待后台线程退出，通常配合 cancel() 使用以保证任务完整收尾。
         """
-        with self._lock:
-            thread = self._thread
-
-        if thread is not None and thread.is_alive():
-            thread.join(timeout)
+        pass
 
     @property
     def execution_count(self) -> int:

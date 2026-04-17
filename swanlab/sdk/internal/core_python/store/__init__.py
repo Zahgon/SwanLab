@@ -46,9 +46,7 @@ class DataStoreWriter:
     """追加写入器，持有一个长期打开的二进制文件句柄。"""
 
     def __init__(self):
-        self._fp: Optional[IO[Any]] = None
-        self._index: int = 0
-        self._flush_offset: int = 0
+        pass
 
     def open(self, filename: str) -> None:
         """创建并初始化文件，文件已存在时抛出 FileExistsError。"""
@@ -56,58 +54,16 @@ class DataStoreWriter:
 
     def write(self, data: bytes) -> None:
         """写入任意字节，遵循 LevelDB log 分块规范。"""
-        assert self._fp is not None, "writer is not open"
-        offset = self._index % LEVELDBLOG_BLOCK_LEN
-        space_left = LEVELDBLOG_BLOCK_LEN - offset
-        data_used = 0
-        data_left = len(data)
-        # 剩余空间不足一个 header：填充 0，归位到下一个块
-        if space_left < LEVELDBLOG_HEADER_LEN:
-            self._fp.write(b"\x00" * space_left)
-            self._index += space_left
-            space_left = LEVELDBLOG_BLOCK_LEN
-        # 数据可以放入当前块
-        if data_left + LEVELDBLOG_HEADER_LEN <= space_left:
-            self._write_record(data)
-        # 否则分块写入
-        else:
-            data_room = space_left - LEVELDBLOG_HEADER_LEN
-            self._write_record(data[:data_room], LEVELDBLOG_FIRST)
-            data_used += data_room
-            data_left -= data_room
-            assert data_left, "data_left should be non-zero"
-            while data_left > LEVELDBLOG_DATA_LEN:
-                self._write_record(data[data_used : data_used + LEVELDBLOG_DATA_LEN], LEVELDBLOG_MIDDLE)
-                data_used += LEVELDBLOG_DATA_LEN
-                data_left -= LEVELDBLOG_DATA_LEN
-            self._write_record(data[data_used:], LEVELDBLOG_LAST)
-        # 每次 write 后统一 fsync，保证落盘
-        try:
-            self._fp.flush()
-            os.fsync(self._fp.fileno())
-        except OSError:
-            pass
-        self._flush_offset = self._index
+        pass
 
     def ensure_flushed(self) -> None:
         pass
 
     def close(self) -> None:
-        assert self._fp is not None, "writer is not open"
-        self._fp.flush()
-        self._fp.close()
-        self._fp = None
+        pass
 
     def _write_record(self, data: bytes, data_type: int = LEVELDBLOG_FULL) -> None:
-        assert self._fp is not None
-        assert len(data) + LEVELDBLOG_HEADER_LEN <= (LEVELDBLOG_BLOCK_LEN - self._index % LEVELDBLOG_BLOCK_LEN), (
-            "not enough space to write new records"
-        )
-        checksum = zlib.crc32(data, _CRC[data_type]) & 0xFFFFFFFF
-        self._fp.write(struct.pack("<IHB", checksum, len(data), data_type))
-        if data:
-            self._fp.write(data)
-        self._index += LEVELDBLOG_HEADER_LEN + len(data)
+        pass
 
 
 # ===========================================================================
@@ -119,8 +75,7 @@ class DataStoreReader:
     """顺序扫描读取器，实现迭代器协议。"""
 
     def __init__(self):
-        self._fp: Optional[IO[Any]] = None
-        self._index: int = 0
+        pass
 
     def open(self, filename: str) -> None:
         """打开文件并校验文件头。"""
@@ -131,19 +86,13 @@ class DataStoreReader:
         pass
 
     def close(self) -> None:
-        assert self._fp is not None, "reader is not open"
-        self._fp.close()
-        self._fp = None
+        pass
 
     def __iter__(self):
-        assert self._fp is not None, "reader is not open"
-        return self
+        pass
 
     def __next__(self) -> bytes:
-        record = self.scan()
-        if record is None:
-            raise StopIteration
-        return record
+        pass
 
     def _read_header(self) -> None:
         pass

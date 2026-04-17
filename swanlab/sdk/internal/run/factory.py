@@ -26,7 +26,7 @@ class NullEmitter(EmitterProtocol):
     """空发射器，emit 为 no-op"""
 
     def __init__(self):
-        self._queue = Queue()
+        pass
 
     def emit(self, event: EventPayload) -> None:
         pass
@@ -41,9 +41,7 @@ def factory_emitter(ctx: RunContext) -> EmitterProtocol:
 
     :param ctx: 运行上下文，包含配置信息和运行时状态
     """
-    if ctx.config.settings.mode == "disabled":
-        return NullEmitter()
-    return RunEmitter()
+    pass
 
 
 class NullConsumer(ConsumerProtocol):
@@ -70,9 +68,7 @@ def factory_consumer(
     :param emitter: 事件发射器
     :param builder: 构建器
     """
-    if ctx.config.settings.mode == "disabled":
-        return NullConsumer(ctx, emitter.queue, builder)
-    return BackgroundConsumer(ctx, emitter.queue, builder)
+    pass
 
 
 def factory_config(ctx: RunContext, emitter: EmitterProtocol) -> Config:
@@ -83,9 +79,7 @@ def factory_config(ctx: RunContext, emitter: EmitterProtocol) -> Config:
     :param emitter: 事件发射器，绑定 config 时用于发出 ConfigEvent
     """
 
-    if ctx.config.settings.mode == "disabled":
-        return create_unbound_run_config()
-    return create_run_config(ctx.config_file, emitter.emit)
+    pass
 
 
 def factory_monitor(ctx: RunContext, emitter: EmitterProtocol) -> Optional["system.Monitor"]:
@@ -95,21 +89,4 @@ def factory_monitor(ctx: RunContext, emitter: EmitterProtocol) -> Optional["syst
     :param emitter:
     :return:
     """
-    if ctx.config.settings.mode == "disabled":
-        return None
-    this_monitor: Optional["system.Monitor"] = None
-    sys_info, monitor = system.new(ctx)
-    ts = Timestamp()
-    ts.GetCurrentTime()
-    if sys_info.metadata:
-        fs.safe_write(ctx.metadata_file, sys_info.metadata.model_dump_json())
-        emitter.emit(MetadataEvent(timestamp=ts))
-    if sys_info.requirements:
-        fs.safe_write(ctx.requirements_file, sys_info.requirements)
-        emitter.emit(RequirementsEvent(timestamp=ts))
-    if sys_info.conda:
-        fs.safe_write(ctx.conda_file, sys_info.conda)
-        emitter.emit(CondaEvent(timestamp=ts))
-    if monitor is not None and monitor.start(ctx, emitter):
-        this_monitor = monitor
-    return this_monitor
+    pass

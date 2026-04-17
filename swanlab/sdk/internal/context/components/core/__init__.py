@@ -19,7 +19,7 @@ class NullCore(CoreProtocol):
     """空 Core，所有方法为 no-op"""
 
     def start(self, start_request: StartRequest) -> StartResponse:
-        return StartResponse(success=True, color="#ffffff")
+        pass
 
     def publish(self, records: List[Record]) -> None: ...
 
@@ -27,7 +27,7 @@ class NullCore(CoreProtocol):
         raise NotImplementedError("NullCore does not support fork, you should not reach here?")
 
     def finish(self, finish_request: FinishRequest) -> FinishResponse:
-        return FinishResponse(success=True, message="I'm a teapot")
+        pass
 
 
 # TODO: 未来实现core以后，python版本依旧会有一段时间的同时存在时间。后续实现一种机制，选择不同的core实现
@@ -39,13 +39,4 @@ def create_core(ctx: "RunContext") -> CoreProtocol:
 
     :param ctx: 运行上下文，包含配置信息和运行时状态
     """
-    if ctx.config.settings.mode == "disabled":
-        return NullCore(ctx)
-
-    if core_enum == CoreEnum.CORE_PYTHON:
-        from swanlab.sdk.internal.core_python import CorePython
-
-        return CorePython(ctx)
-    else:
-        # TODO: Core 微服务无感接入
-        raise NotImplementedError(f"CoreEnum {core_enum} is not supported yet.")
+    pass

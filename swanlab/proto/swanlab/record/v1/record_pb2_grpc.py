@@ -37,21 +37,7 @@ class RecordServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.RunStart = channel.unary_unary(
-                '/swanlab.record.v1.RecordService/RunStart',
-                request_serializer=swanlab_dot_run_dot_v1_dot_run__pb2.StartRequest.SerializeToString,
-                response_deserializer=swanlab_dot_run_dot_v1_dot_run__pb2.StartResponse.FromString,
-                _registered_method=True)
-        self.UpsertRecord = channel.unary_unary(
-                '/swanlab.record.v1.RecordService/UpsertRecord',
-                request_serializer=swanlab_dot_record_dot_v1_dot_record__pb2.Record.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
-                _registered_method=True)
-        self.RunFinish = channel.unary_unary(
-                '/swanlab.record.v1.RecordService/RunFinish',
-                request_serializer=swanlab_dot_run_dot_v1_dot_run__pb2.FinishRequest.SerializeToString,
-                response_deserializer=swanlab_dot_run_dot_v1_dot_run__pb2.FinishResponse.FromString,
-                _registered_method=True)
+        pass
 
 
 class RecordServiceServicer(object):

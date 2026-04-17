@@ -64,94 +64,15 @@ class Image(TransformMedia):
             - (w, None) / (None, h): fix one dimension, scale the other proportionally.
             - None: no resize.
         """
-        super().__init__()
-
-        # 套娃加载
-        attrs = self._unwrap(data_or_path)
-        if attrs:
-            self.buffer: BytesIO = attrs["buffer"]
-            self.file_type: str = attrs["file_type"]
-            self.caption: Optional[str] = caption if caption is not None else attrs.get("caption")
-            return
-
-        # 校验 file_type
-        file_types = get_args(get_args(ImageFileType)[0])
-        ft = (file_type or "png").lower()
-        if ft not in file_types:
-            raise ValueError(f"Unsupported file_type '{ft}'. Accepted: {file_types}")
-        self.file_type = ft
-
-        # ---------- 各类型输入 → PIL Image ----------
-        # 考虑到懒加载限制我们一般使用鸭子类型判断，而不是 isinstance
-        PILImage = vendor.PIL.Image
-        # 1. 文件路径
-        if isinstance(data_or_path, str):
-            if data_or_path.lower().endswith(".gif"):
-                raise TypeError("GIF images are not supported. Please convert to PNG or JPG first.")
-            try:
-                pil_img = PILImage.open(data_or_path)
-            except Exception as e:
-                raise ValueError(f"Failed to open image file: {data_or_path!r}") from e
-            if getattr(pil_img, "format", None) == "GIF":
-                raise TypeError("GIF images are not supported. Please convert to PNG or JPG first.")
-            image_data = pil_img.convert(mode)
-        # 2. PIL Image
-        elif isinstance(data_or_path, PILImage.Image):
-            if getattr(data_or_path, "format", None) == "GIF":
-                raise TypeError("GIF images are not supported. Please convert to PNG or JPG first.")
-            image_data = data_or_path.convert(mode)
-        # 3. PyTorch Tensor
-        elif _is_torch_tensor(data_or_path):
-            t = data_or_path
-            if hasattr(t, "requires_grad") and t.requires_grad:  # type: ignore[union-attr]
-                t = t.detach()  # type: ignore[union-attr]
-            t = vendor.torchvision.utils.make_grid(t, normalize=True)  # type: ignore[arg-type]
-            image_data = PILImage.fromarray(t.mul(255).clamp(0, 255).byte().permute(1, 2, 0).cpu().numpy(), mode=mode)
-        # 4. Matplotlib Figure
-        elif hasattr(data_or_path, "savefig"):
-            try:
-                buf = BytesIO()
-                data_or_path.savefig(buf, format=self.file_type)  # type: ignore[union-attr]
-                buf.seek(0)
-                image_data = PILImage.open(buf).convert(mode)
-                buf.close()
-            except Exception as e:
-                raise TypeError("Failed to convert matplotlib figure to image") from e
-        # 5. Numpy Array
-        elif isinstance(data_or_path, vendor.np.ndarray):
-            arr = data_or_path
-            if arr.ndim == 2 or (arr.ndim == 3 and arr.shape[2] in (3, 4)):
-                image_data = PILImage.fromarray(vendor.np.clip(arr, 0, 255).astype(vendor.np.uint8))
-                if mode is not None and image_data.mode != mode:
-                    image_data = image_data.convert(mode)
-            else:
-                raise TypeError(f"Invalid numpy array shape for Image: expected (H, W) or (H, W, 3/4), got {arr.shape}")
-
-        else:
-            raise TypeError(
-                f"Unsupported image type: {type(data_or_path).__name__}. "
-                "Please provide a file path, PIL.Image, numpy.ndarray, torch.Tensor, or matplotlib figure."
-            )
-
-        image_data = _resize(image_data, size)
-        self.buffer = BytesIO()
-        save_fmt = "jpeg" if self.file_type == "jpg" else self.file_type
-        image_data.save(self.buffer, format=save_fmt)
-        self.caption = caption
+        pass
 
     @classmethod
     def column_type(cls) -> ColumnType:
-        return ColumnType.COLUMN_TYPE_IMAGE
+        pass
 
     @classmethod
     def build_data_record(cls, *, key: str, step: int, timestamp: Timestamp, data: List[ImageItem]) -> DataRecord:
-        return DataRecord(
-            key=key, step=step, timestamp=timestamp, type=cls.column_type(), images=ImageValue(items=data)
-        )
+        pass
 
     def transform(self, *, step: int, path: Path) -> ImageItem:
-        content = self.buffer.getvalue()
-        sha256 = hashlib.sha256(content).hexdigest()
-        filename = f"{step:03d}-{sha256[:8]}.{self.file_type}"
-        fs.safe_write(path / filename, content, mode="wb")
-        return ImageItem(filename=filename, sha256=sha256, size=len(content), caption=self.caption or "")
+        pass

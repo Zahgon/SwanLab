@@ -51,15 +51,7 @@ def set_nested_value(d: dict, key: str, value: Any):
     :param key: 键路径，使用点分隔
     :param value: 要设置的值，如果为 None 则不设置
     """
-    if value is None:
-        return
-    keys = key.split(".")
-    current_dict = d
-    for k in keys[:-1]:
-        if k not in current_dict:
-            current_dict[k] = {}
-        current_dict = current_dict[k]
-    current_dict[keys[-1]] = value
+    pass
 
 
 def compatible_kwargs(model_dict: dict, **kwargs) -> dict:
@@ -68,10 +60,7 @@ def compatible_kwargs(model_dict: dict, **kwargs) -> dict:
     将一些额外的参数合并到 model_dict 中
     """
     # experiment_name --> name
-    set_nested_value(model_dict, "experiment.name", kwargs.pop("experiment_name", None))
-    # notes --> description
-    set_nested_value(model_dict, "experiment.description", kwargs.pop("notes", None))
-    return model_dict
+    pass
 
 
 ConfigLike = Union[Dict[str, Any], str, os.PathLike]
@@ -177,69 +166,7 @@ def init(
         ...     resume="must"
         ... )
     """
-    if reinit and has_run():
-        run = get_run()
-        run.finish()
-    if has_run():
-        raise RuntimeError(
-            "`swanlab.init` requires an inactive Run. Please use `swanlab.finish()` or `swanlab.init(reinit=True)` first."
-        )
-    # 运行时配置
-    run_settings = Settings()
-    # --------------------- 合并配置，检查格式，与业务无关 ----------------------------
-    # 配置具有优先级，从低到高依次是：全局配置 --> 自定义配置 --> 传入的参数
-    # 1. 合并全局配置
-    run_settings.merge_settings(global_settings)
-    # 2. 合并自定义配置
-    if settings:
-        run_settings.merge_settings(settings)
-    # 3. 基于传入的参数，合并当前配置，此步骤必须在合并全局配置之后，因为传入的参数的优先级是高于全局配置的
-    args_dict = compatible_kwargs({}, **kwargs)
-    for key, value in {
-        "logdir": logdir,
-        "mode": mode,
-        "project.name": project or Path.cwd().name,
-        "project.workspace": workspace,
-        "project.public": public,
-        "experiment.name": name,
-        "experiment.color": color,
-        "experiment.description": description,
-        "experiment.job_type": job_type,
-        "experiment.group": group,
-        "experiment.tags": tags,
-        "run.resume": resume,
-        "run.id": id,
-        "run.config": Path(config) if isinstance(config, (str, os.PathLike)) else None,
-    }.items():
-        set_nested_value(args_dict, key, value)
-    run_settings.merge_settings(args_dict)
-    # ---------------------------------- 再次确认参数 ----------------------------------
-    # 根据交互式引导确定最终的模式
-    mode = prompt_init_mode(run_settings)
-    run_settings.merge_settings({"mode": mode})
-    # 校验 run id 与 resume，仅在对两者存在性有要求的模式下校验
-    if run_settings.mode == "cloud":
-        if run_settings.run.resume == "must":
-            assert run_settings.run.id is not None, "Run id must be provided when resume=must."
-        elif run_settings.run.resume == "never":
-            assert run_settings.run.id is None, "Run id should not be provided when resume=never."
-    # ---------------------------------- 初始化 ----------------------------------
-    # 合并回调
-    callbacker.merge_callbacks(callbacks or [])
-    # 开始初始化
-    ctx = _init(run_settings)
-    # 初始化run
-    run = Run(ctx)
-    # 发送webhook回调，在除了disabled模式外，都会触发
-    success = send_webhook(ctx)
-    if not success:
-        webhook_url = ctx.config.settings.integration.webhook.url
-        console.warning(f"Failed to send webhook, maybe due to network issues or invalid webhook URL: {webhook_url}.")
-    # 加载配置并合并到 run.config
-    config_data = load_config(run_settings, config)
-    if config_data:
-        run.config.update(config_data)
-    return run
+    pass
 
 
 def _init(run_settings: Settings) -> RunContext:
@@ -247,67 +174,7 @@ def _init(run_settings: Settings) -> RunContext:
     初始化运行时配置，在这之前，所有引导式交互都已经完成
     上下文生命周期通过 `Run` 管理，而非全局 `ContextVar`
     """
-    mode = run_settings.mode
-    # 生成run_id
-    run_id = run_settings.run.id or generate_id()
-    run_dir = run_settings.log_dir / ("run-" + datetime.now().strftime("%Y%m%d_%H%M%S") + "-" + run_id)
-    # 创建一个临时的上下文，避免出现任何问题导致上下文残留
-    with use_context(RunContext(config=RunConfig(settings=run_settings, run_dir=run_dir))) as ctx:
-        assert run_settings.project.name, "Project name is required."
-        # 根据模式进行特定处理
-        if mode == "cloud":
-            _init_cloud(ctx, run_id)
-        elif mode == "local":
-            _mkdirs(ctx)
-            name = generate_name("beauty")
-            color = generate_color("beauty")
-            workspace = "local"
-            # 合并配置
-            args_dict = {}
-            for key, value in {
-                "experiment.name": name,
-                "experiment.color": color,
-                "run.id": run_id,
-                "project.workspace": workspace,
-            }.items():
-                set_nested_value(args_dict, key, value)
-            run_settings.merge_settings(args_dict)
-
-            # TODO: 注册回调器
-        elif mode == "offline":
-            _mkdirs(ctx)
-            name = generate_name("beauty")
-            color = generate_color("beauty")
-            workspace = "offline"
-            # 合并配置
-            args_dict = {}
-            for key, value in {
-                "experiment.name": name,
-                "experiment.color": color,
-                "project.workspace": workspace,
-                "run.id": run_id,
-            }.items():
-                set_nested_value(args_dict, key, value)
-            run_settings.merge_settings(args_dict)
-        elif mode == "disabled":
-            name = generate_name("beauty")
-            color = generate_color("beauty")
-            workspace = "disabled"
-            # 合并配置
-            args_dict = {}
-            for key, value in {
-                "experiment.name": name,
-                "experiment.color": color,
-                "project.workspace": workspace,
-                "run.id": run_id,
-            }.items():
-                set_nested_value(args_dict, key, value)
-            run_settings.merge_settings(args_dict)
-            # 不注册回调器
-            pass
-        else:
-            raise ValueError(f"Invalid mode for `swanlab.init`: {mode}")
-    return ctx
+    pass
 
 
 @utils.with_loading_animation()
@@ -317,103 +184,14 @@ def _init_cloud(ctx: RunContext, run_id: str):
     :param ctx: 运行上下文
     :param run_id: 当前运行的唯一标识符
     """
-    run_settings = ctx.config.settings
-    if not client.exists():
-        assert run_settings.api_key, "API key is required."
-        assert run_settings.api_host, "API host is required."
-        login_raw(
-            api_key=run_settings.api_key,
-            host=run_settings.api_host,
-            save=False,
-            animation=False,
-            wellcome_on_success=False,
-        )
-    assert run_settings.project.name, "Project name is required."
-    assert client.exists(), "No client found, please login first."
-    _mkdirs(ctx)
-    # 获取当前项目，如果不存在则创建
-    project = get_or_create_project(
-        username=run_settings.project.workspace,
-        name=run_settings.project.name,
-        public=run_settings.project.public,
-    )
-    username, project = project["username"], project["name"]
-    # 获取当前项目详细信息
-    project_info = get_project(username=username, name=project)
-    # 获取当前实验
-    experiment = run_settings.experiment
-    history_experiment_count = project_info["_count"]["experiments"]
-    name = experiment.name or generate_name(history_experiment_count)
-    color = experiment.color or generate_color(history_experiment_count)
-    # 开启实验
-    _ = create_or_resume_experiment(
-        username,
-        project,
-        name=name,
-        resume=run_settings.run.resume,
-        run_id=run_id,
-        color=color,
-        description=experiment.description,
-        job_type=experiment.job_type,
-        group=experiment.group,
-        tags=experiment.tags,
-    )
-    # TODO resume 时向后端获取数据或向本地获取数据
-
-    # 最后同步一次配置
-    args_dict = {}
-    for key, value in {
-        "project.workspace": username,
-        "project.name": project,
-        "experiment.name": name,
-        "experiment.color": color,
-        "run.id": run_id,
-    }.items():
-        set_nested_value(args_dict, key, value)
-    run_settings.merge_settings(args_dict)
+    pass
 
 
 def load_config(run_settings: Settings, config: Optional[ConfigLike]) -> Dict[str, Any]:
     """
     优雅地加载配置：支持字典直接返回，或从 JSON/YAML 文件加载。
     """
-    config = config or run_settings.run.config
-    # 1. 如果 config 为 None，则返回空字典
-    if config is None:
-        return {}
-
-    # 2. 如果 config 是字典，则直接返回
-    if isinstance(config, dict):
-        return config
-
-    # 3. 处理路径类型（包括字符串字面量）
-    if isinstance(config, (str, os.PathLike)):
-        path = Path(config)
-
-        if not path.exists():
-            raise FileNotFoundError(f"Config file not found: {path}")
-
-        # 根据后缀名选择加载器
-        suffix = path.suffix.lower()
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                if suffix == ".json":
-                    return json.load(f)
-                elif suffix in (".yaml", ".yml"):
-                    # 使用 safe_load 保证安全
-                    return yaml.safe_load(f)
-                else:
-                    # 如果没有后缀或者后缀未知，尝试先按 JSON 读，失败再按 YAML 读
-                    content = f.read()
-                    try:
-                        return json.loads(content)
-                    except json.JSONDecodeError:
-                        return yaml.safe_load(content)
-        except Exception as e:
-            raise ValueError(f"Error parsing config file {path}: {e}")
-
-    # 4. 如果 config 不是上述类型，直接报错
-    raise ValueError(f"Invalid config type: {type(config).__name__}. Expected dict, str, or PathLike.")
+    pass
 
 
 def _mkdirs(ctx: RunContext):
@@ -422,13 +200,7 @@ def _mkdirs(ctx: RunContext):
     :param ctx: 运行上下文
     """
     # 对于 logdir 而言，如果不存在则创建，如果为空则写入 .gitignore
-    log_dir = ctx.config.settings.log_dir
-    # 1. 安全创建目录（如果不存在）
-    fs.safe_mkdir(log_dir)
-    # 2. 写入 .gitignore（如果目录为空）
-    utils.append_gitignore(log_dir)
-    # 3. 创建别的目录
-    fs.safe_mkdirs(ctx.run_dir, ctx.media_dir, ctx.files_dir, ctx.debug_dir)
+    pass
 
 
 def prompt_init_mode(settings: Settings) -> ModeType:
@@ -444,52 +216,7 @@ def prompt_init_mode(settings: Settings) -> ModeType:
     :return: 最终确定的 mode
     """
     # 如果不是云模式，或者已经登录，或者非交互环境，直接返回当前状态
-    mode = settings.mode
-    if mode != "cloud" or client.exists():
-        return mode
-    login_func = partial(login_cli, save=True, host=settings.api_host)
-    if mode == "cloud":
-        if settings.api_key is not None:
-            # 不登录，交给后面处理，否则会出现闪烁动画，比较影响美感
-            # login_func(api_key=settings.api_key)
-            return "cloud"
-
-        if not settings.interactive:
-            raise RuntimeError(
-                "Failed to initialize SwanLab in cloud mode: no API key was provided, "
-                "and interactive prompts are disabled."
-            )
-        if not helper.is_interactive():
-            raise RuntimeError("Failed to initialize SwanLab in cloud mode: no TTY is available for interactive login.")
-
-        console.info("Using SwanLab to track your experiments. To get started, choose one of the following options:")
-        console.print(
-            "(1) Use an existing API key.",
-            "(2) Create a new SwanLab account.",
-            "(3) Continue without visualization (Offline mode).",
-            "Learn more in the documentation: https://docs.swanlab.cn",
-            sep="\n",
-        )
-        while True:
-            choice = input("Enter your choice [1/2/3]: ").strip()
-
-            if choice == "1":
-                console.info("Using an existing SwanLab API key.")
-                login_func()
-                return "cloud"
-
-            if choice == "2":
-                console.info(f"Create a SwanLab account here:{settings.web_host}/login")
-                login_func()
-                return "cloud"
-
-            if choice == "3":
-                console.info("Continuing in Offline mode. Results will be saved locally.")
-                return "offline"
-
-            console.warning("Invalid choice. Please enter 1, 2, or 3.")
-    # 其他模式不登录
-    return mode
+    pass
 
 
 @safe.decorator(message="Failed to send webhook")
@@ -511,34 +238,4 @@ def send_webhook(ctx: RunContext) -> Tuple[bool, bool]:
     :param ctx: 运行上下文
     :return: (是否发送，是否成功)
     """
-    if ctx.config.settings.mode == "disabled":
-        console.debug("Skipping webhook because mode is disabled.")
-        return False, False
-    settings = ctx.config.settings
-    webhook = settings.integration.webhook
-    webhook_url = webhook.url
-    if not webhook_url:
-        console.debug("Skipping webhook because SWANLAB_WEBHOOK is not set.")
-        return False, False
-    webhook_value = webhook.value
-    webhook_timeout = webhook.timeout
-    # 获取实验url
-    if settings.mode == "cloud":
-        exp_url = f"{settings.web_host}/@{settings.project.workspace}/{settings.project.name}/runs/{settings.run.id}"
-    else:
-        exp_url = None
-    # 发送请求
-    requests.post(
-        webhook_url,
-        timeout=webhook_timeout,
-        json={
-            "value": webhook_value,
-            "swanlab": {
-                "version": helper.get_swanlab_version(),
-                "mode": ctx.config.settings.mode,
-                "run_dir": ctx.run_dir,
-                "exp_url": exp_url,
-            },
-        },
-    )
-    return True, True
+    pass

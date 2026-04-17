@@ -21,8 +21,7 @@ def get_swanlab_version() -> str:
     :return: swanlab的版本号
     """
     # 读取package.json文件
-    with open(package_path, "r") as f:
-        return json.load(f)["version"]
+    pass
 
 
 @safe.decorator(level="debug", message="Failed to fetch swanlab latest version")
@@ -33,9 +32,4 @@ def get_swanlab_latest_version(timeout=1, url="https://pypi.org/pypi/swanlab/jso
     :param url: PyPI API URL
     :return: 最新版本号
     """
-    response = requests.get(url, timeout=timeout)
-    if response.status_code == 200:
-        data = response.json()
-        return data["info"]["version"]
-    else:
-        return None
+    pass

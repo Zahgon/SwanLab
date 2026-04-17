@@ -22,25 +22,16 @@ from swanlab.sdk.typings.run.transforms.text import TextDataType
 
 class Text(TransformMedia):
     def __init__(self, content: TextDataType, caption: CaptionType = None):
-        super().__init__()
-        attrs = self._unwrap(content)
-        self.content = attrs.get("content", content)
-        self.caption = caption if caption is not None else attrs.get("caption")
+        pass
 
     @classmethod
     def column_type(cls) -> ColumnType:
-        return ColumnType.COLUMN_TYPE_TEXT
+        pass
 
     @classmethod
     def build_data_record(cls, *, key: str, step: int, timestamp: Timestamp, data: List[TextItem]) -> DataRecord:
-        return DataRecord(key=key, step=step, timestamp=timestamp, type=cls.column_type(), texts=TextValue(items=data))
+        pass
 
     def transform(self, *, step: int, path: Path) -> TextItem:
         # 计算 sha256
-        sha256 = hashlib.sha256(self.content.encode()).hexdigest()
-        # 构建 filename
-        # 历史版本直接将用户传入的content写入CH，这交给前端去适配
-        filename = f"{step:03d}-{sha256[:8]}.txt"
-        # 写入数据
-        fs.safe_write(path / filename, self.content)
-        return TextItem(filename=filename, caption=self.caption)
+        pass

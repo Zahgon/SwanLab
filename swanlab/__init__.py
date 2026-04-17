@@ -60,9 +60,4 @@ __all__ = [
 
 
 def __getattr__(name: str):
-    if name == "run":
-        try:
-            return get_run()
-        except RuntimeError:
-            return None
-    raise AttributeError(f"module 'swanlab' has no attribute {name!r}")
+    pass

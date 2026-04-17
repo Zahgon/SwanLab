@@ -36,4 +36,4 @@ from swanlab import sdk
 @click.option("--local", is_flag=True, help="Login to local (save .swanlab in current directory)")
 def login(api_key: str, relogin: bool, host: str, local: bool):
     """Login to the SwanLab cloud."""
-    sdk.login_cli(api_key=api_key, relogin=relogin, host=host, save="local" if local else "root")
+    pass

@@ -201,7 +201,7 @@ class MetadataSnapshot(BaseModel):
     git: Optional[GitSnapshot] = None
 
     def del_hardware(self):
-        return self.model_copy(update={"hardware": None})
+        pass
 
     model_config = ConfigDict(frozen=True)
 
@@ -244,39 +244,7 @@ class SystemShim(BaseModel):
     def from_snapshot(cls, snapshot: MetadataSnapshot, platform: str) -> "SystemShim":
         """从 MetadataSnapshot 提取，不做额外的系统探测。"""
         # 1. 处理平台标识
-        _slug: PlatformSlug
-        if snapshot.hardware is None:
-            _slug = "unknown"
-        elif platform.startswith("linux"):
-            _slug = "linux"
-        elif platform.startswith("darwin"):
-            _slug = "macos-arm" if snapshot.hardware.apple_silicon is not None else "macos-intel"
-        else:
-            _slug = "windows"
-
-        # 2. 处理 CPU 和内存监控开关
-        if snapshot.hardware is not None:
-            enable_cpu = snapshot.hardware.cpu is not None or snapshot.hardware.apple_silicon is not None
-            enable_memory = snapshot.hardware.memory is not None or snapshot.hardware.apple_silicon is not None
-        else:
-            enable_cpu = False
-            enable_memory = False
-
-        # 3. 处理加速器监控配置
-        accelerators = []
-        if snapshot.hardware is not None:
-            for acc in snapshot.hardware.accelerators:
-                if acc.vendor and acc.devices:
-                    indices = [d.index for d in acc.devices if d.index is not None]
-                    if indices:
-                        accelerators.append(AcceleratorMonitorConfig(vendor=acc.vendor, device_indices=indices))
-
-        return cls(
-            enable_cpu=enable_cpu,
-            enable_memory=enable_memory,
-            accelerators=accelerators,
-            slug=_slug,
-        )
+        pass
 
 
 # ──────────────────────────────────────────────

@@ -46,4 +46,4 @@ def merge_settings(settings: Union[Settings, dict]) -> None:
         >>> swanlab.merge_settings(custom_settings)
         >>> swanlab.init()
     """
-    swanlab_settings.merge_settings(settings)
+    pass

@@ -71,24 +71,7 @@ def reset() -> None:
     重置日志模块状态，恢复到初始的内存缓冲模式。
     释放现有的文件句柄，清除所有已绑定的 Handler。
     """
-    global _memory_handler, _file_handler, _bound
-
-    # 1. 安全关闭并移除所有现有的 Handlers（防止文件句柄泄露）
-    for handler in _logger.handlers[:]:
-        handler.close()
-        _logger.removeHandler(handler)
-
-    # 2. 重新初始化内存缓冲 Handler
-    _memory_handler = MemoryHandler(
-        capacity=1024,
-        flushLevel=logging.CRITICAL + 1,
-    )
-    _memory_handler.setFormatter(_FORMATTER)
-    _logger.addHandler(_memory_handler)
-
-    # 3. 重置状态标志
-    _file_handler = None
-    _bound = False
+    pass
 
 
 # 模块首次导入时，执行一次初始化
@@ -120,22 +103,22 @@ def bindfile(log_dir: Path) -> None:
 
 def debug(msg: str, *args) -> None:
     """记录调试级别的诊断日志"""
-    _logger.debug(msg, *args)
+    pass
 
 
 def info(msg: str, *args) -> None:
     """记录信息级别的诊断日志"""
-    _logger.info(msg, *args)
+    pass
 
 
 def warning(msg: str, *args) -> None:
     """记录警告级别的诊断日志"""
-    _logger.warning(msg, *args)
+    pass
 
 
 def error(msg: str, *args) -> None:
     """记录错误级别的诊断日志"""
-    _logger.error(msg, *args)
+    pass
 
 
 def critical(msg: str, *args) -> None:

@@ -31,40 +31,7 @@ def json_serializable(obj: Any) -> Any:
 
     :raises TypeError: 对象无法被序列化
     """
-    if obj is None:
-        return None
-
-    # float 特殊值须在 _BASE_TYPES 循环前处理
-    if type(obj) is float:
-        if math.isnan(obj):
-            return "NaN"
-        if math.isinf(obj):
-            return "Inf"
-
-    # bool 继承自 int，必须先判断
-    if type(obj) is bool:
-        return obj
-
-    for t in _BASE_TYPES:
-        if type(obj) is t:
-            return obj
-        # 子类（如 numpy.float64）→ 转为原生类型
-        if isinstance(obj, t):
-            return t(obj)
-
-    if isinstance(obj, (datetime.date, datetime.datetime)):
-        return obj.isoformat()
-
-    if isinstance(obj, (list, tuple)):
-        return [json_serializable(item) for item in obj]
-
-    if isinstance(obj, (dict, MutableMapping)):
-        return {str(k): json_serializable(v) for k, v in obj.items()}
-
-    try:
-        return str(obj)
-    except Exception:
-        raise TypeError(f"Object {obj!r} is not JSON serializable")
+    pass
 
 
 def adapt_third_party(data: Any) -> dict:
@@ -80,33 +47,7 @@ def adapt_third_party(data: Any) -> dict:
     :raises TypeError: 未能命中任何适配器
     """
     # omegaconf
-    try:
-        import omegaconf  # noqa
-
-        if isinstance(data, omegaconf.DictConfig):
-            return omegaconf.OmegaConf.to_container(data, resolve=True, throw_on_missing=True)  # type: ignore
-    except ImportError:
-        pass
-
-    # mmengine
-    try:
-        import mmengine  # noqa
-
-        if isinstance(data, mmengine.Config):
-            return mmengine.Config.to_dict(data)
-    except ImportError:
-        pass
-
-    # argparse.Namespace（标准库，无需 try/except）
-    if isinstance(data, argparse.Namespace):
-        return vars(data)
-
-    # dataclass 实例（注意排除 dataclass 类本身）
-    if is_dataclass(data) and not isinstance(data, type):
-        # noqa: 虽然警告 'dataclasses.asdict' method should be called on dataclass instances，但此处 data 已经是 dataclass 实例了
-        return asdict(cast(Any, data))
-
-    raise TypeError
+    pass
 
 
 def parse(config: Any) -> dict:
@@ -120,25 +61,4 @@ def parse(config: Any) -> dict:
 
     :raises TypeError: 所有策略均失败
     """
-    if config is None:
-        return {}
-
-    # 1. 第三方类型适配
-    try:
-        return adapt_third_party(config)
-    except TypeError:
-        pass
-
-    # 2. json_serializable
-    try:
-        result = json_serializable(config)
-        if isinstance(result, dict):
-            return result
-    except TypeError:
-        pass
-
-    # 3. JSON round-trip 兜底
-    try:
-        return json.loads(json.dumps(config))
-    except Exception as e:
-        raise TypeError(f"config {config!r} is not a JSON-serializable dict: {e}")
+    pass

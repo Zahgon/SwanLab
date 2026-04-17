@@ -31,9 +31,7 @@ def fmt_system_key(key: str):
     """
     格式化系统指标key，如果已经是系统指标key，报错
     """
-    if key.startswith(_SYSTEM_KEY_PREFIX):
-        raise ValueError(f"System metric key '{key}' is already a system metric key")
-    return f"{_SYSTEM_KEY_PREFIX}{key}"
+    pass
 
 
 def is_system_key(key: str):
@@ -51,9 +49,7 @@ class Monitor:
     """
 
     def __init__(self, shim: SystemShim):
-        self._timer: Optional[timer.Timer] = None
-        self._executor: Optional[ThreadPoolExecutor] = None
-        self._shim = shim
+        pass
 
     def start(self, ctx: RunContext, emitter: EmitterProtocol) -> bool:
         # 1. 收集采集器
@@ -116,9 +112,4 @@ class Monitor:
         return True
 
     def stop(self) -> None:
-        assert self._timer is not None, "HardwareMonitor is not running"
-        self._timer.cancel()
-        self._timer.join()
-        if self._executor is not None:
-            self._executor.shutdown(wait=True)
-            self._executor = None
+        pass

@@ -20,22 +20,19 @@ class RecordBuffer:
     __slots__ = ("_records", "_record_num_index")
 
     def __init__(self) -> None:
-        self._records: List[Record] = []
-        self._record_num_index: set[int] = set()
+        pass
 
     def __len__(self) -> int:
-        return len(self._records)
+        pass
 
     def __bool__(self) -> bool:
-        return bool(self._records)
+        pass
 
     # ── 写入 ──
 
     def extend(self, records: List[Record]) -> int:
         """追加 records，自动按 num 去重。返回实际入队的数量。"""
-        accepted_records = [record for record in records if self._try_enqueue(record)]
-        self._records.extend(accepted_records)
-        return len(accepted_records)
+        pass
 
     def prepend(self, records: List[Record]) -> int:
         """回滚到头部，自动按 num 去重。返回实际入队的数量。"""
@@ -43,10 +40,7 @@ class RecordBuffer:
 
     def _try_enqueue(self, record: Record) -> bool:
         """根据 record num 去重，未存在则注册并返回 True。"""
-        if record.num in self._record_num_index:
-            return False
-        self._record_num_index.add(record.num)
-        return True
+        pass
 
     # ── 读取 ──
 

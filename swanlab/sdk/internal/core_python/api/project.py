@@ -21,7 +21,7 @@ def get_project(*, username: str, name: str) -> ProjectType:
     :param name: 项目名称
     :return: 项目信息
     """
-    return client.get(f"/project/{username}/{name}").data
+    pass
 
 
 def get_or_create_project(*, username: Optional[str], name: str, public: bool) -> InitProjectType:
@@ -32,13 +32,4 @@ def get_or_create_project(*, username: Optional[str], name: str, public: bool) -
     :param public: 项目是否公开
     :return: 项目信息
     """
-    try:
-        data = {"name": name, "visibility": "PUBLIC" if public else "PRIVATE", "username": username}
-        return client.post("/project", data=helper.strip_none(data)).data
-    except ApiError as e:
-        if e.response.status_code == 409:
-            # 项目已经存在，从对象中解析信息
-            return cast(InitProjectType, cast(object, decode_response(e.response)))
-        else:
-            # 此接口为后端处理，sdk 在理论上不会出现其他错误，因此不需要处理其他错误
-            raise e
+    pass

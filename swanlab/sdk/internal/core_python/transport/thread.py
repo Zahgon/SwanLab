@@ -38,44 +38,15 @@ class Transport:
         sender: Optional[HttpRecordSender] = None,
         auto_start: bool = True,
     ):
-        self._batch_interval = self.BATCH_INTERVAL if batch_interval is None else batch_interval
-        self._upload_callback = upload_callback
-
-        self._cond = threading.Condition()
-        self._buf = RecordBuffer()
-        self._finished = False
-        self._started = False
-        self._thread: Optional[threading.Thread] = None
-        self._sender_closed = False
-
-        # Transport 持有 sender，负责创建/注入/关闭
-        self._sender = sender if sender is not None else HttpRecordSender()
-        self._dispatcher = Dispatch(
-            sender=self._sender,
-            upload_callback=self._upload_callback,
-        )
-
-        if auto_start:
-            self.start()
+        pass
 
     def start(self) -> None:
         """启动守护线程。"""
-        if self._started or self._finished:
-            return
-        self._thread = threading.Thread(target=self._loop, name=self.THREAD_NAME, daemon=True)
-        self._thread.start()
-        self._started = True
+        pass
 
     def put(self, records: List[Record]) -> None:
         """追加 records 到 buffer 并唤醒线程。"""
-        if self._finished:
-            console.warning("Transport has already been finished.")
-            return
-        if not records:
-            return
-        with self._cond:
-            if self._buf.extend(records) > 0:
-                self._cond.notify()
+        pass
 
     def finish(self) -> None:
         """
@@ -88,31 +59,10 @@ class Transport:
         - join timeout 设为 30s 以覆盖弱网下多 chunk 重试场景；
           超时后线程仍为 daemon 线程会随进程退出，不会泄漏。
         """
-        if self._finished:
-            return
-        with self._cond:
-            self._finished = True
-            self._cond.notify_all()
-        if self._thread is None:
-            # 未启动线程时直接关闭
-            self._close_sender()
-            return
-
-        self._thread.join(timeout=self.FINISH_JOIN_TIMEOUT)
-        if self._thread.is_alive():
-            console.warning(
-                "Transport thread is still running after finish timeout; "
-                "it will continue retrying as a daemon and close sender on exit."
-            )
-        else:
-            # 线程已退出，确保 sender 已关闭（_loop finally 已调用，此处为兜底）
-            self._close_sender()
+        pass
 
     def _close_sender(self) -> None:
-        if self._sender_closed:
-            return
-        self._sender.close()
-        self._sender_closed = True
+        pass
 
     # ── 线程主循环 ──
 

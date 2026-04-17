@@ -29,28 +29,15 @@ class Scope:
         :param bubble_up: 是否在退出当前 Scope 时，将收集到的数据合并（冒泡）到父级 Scope 中。
                           如果你希望顶层 Scope 能在最后拿到所有子 Scope 收集的汇总数据，请设为 True。
         """
-        self.data: Dict[str, Any] = {}
-        self.bubble_up = bubble_up
-        self._token: Optional[contextvars.Token] = None
-        self._parent: Optional["Scope"] = None
+        pass
 
     def __enter__(self) -> "Scope":
         # 1. 记录可能存在的父级 Scope（用于嵌套链式查找或冒泡合并）
-        self._parent = _scope_ctx.get()
-
-        # 2. 夺取控制权，将当前实例设置为全局激活的上下文
-        self._token = _scope_ctx.set(self)
-        return self
+        pass
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         # 1. 退出时，安全地归还上下文控制权给父级
-        if self._token is not None:
-            _scope_ctx.reset(self._token)
-            self._token = None
-
-        # 2. 退出清理：如果开启了冒泡，并且存在父级 Scope，则把自己的数据上报合并给父级
-        if self.bubble_up and self._parent is not None:
-            self._parent.data.update(self.data)
+        pass
 
     def set(self, key: str, value: Any) -> None:
         """向当前 Scope 中写入数据"""
@@ -61,11 +48,7 @@ class Scope:
         从当前 Scope 中读取数据。
         【嵌套特性】：如果当前层级没有这个数据，会自动向上级 Scope 追溯寻找。
         """
-        if key in self.data:
-            return self.data[key]
-        if self._parent is not None:
-            return self._parent.get(key, default)
-        return default
+        pass
 
 
 # ==============================================================================
@@ -78,9 +61,7 @@ def set_context(key: str, value: Any) -> None:
     【隔空写入】跨层级写入上下文数据。
     如果当前不在任何 Scope 的 with 块中，则静默忽略（非常安全）。
     """
-    current_scope = _scope_ctx.get()
-    if current_scope is not None:
-        current_scope.set(key, value)
+    pass
 
 
 def get_context(key: str, default: Any = None) -> Any:
@@ -88,7 +69,4 @@ def get_context(key: str, default: Any = None) -> Any:
     【隔空读取】跨层级读取上下文数据。
     如果当前不在任何 Scope 的 with 块中，则返回 default。
     """
-    current_scope = _scope_ctx.get()
-    if current_scope is not None:
-        return current_scope.get(key, default)
-    return default
+    pass

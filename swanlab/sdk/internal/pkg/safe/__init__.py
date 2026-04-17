@@ -83,11 +83,4 @@ def block(
         with safe_block(message="failed to do something"):
             risky_operation()
     """
-    catch_types = exceptions if exceptions else (Exception,)
-    try:
-        yield
-    except catch_types as e:
-        if message is not None:
-            console.trace(message, write_to_file=write, level_name=level)
-        if on_error is not None:
-            on_error(e)
+    pass

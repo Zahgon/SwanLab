@@ -19,21 +19,11 @@ class _CallbackManager:
 
     def __init__(self):
         # 使用字典保证顺序并天然去重
-        self._callbacks: Dict[str, Callback] = {}
+        pass
 
     def merge_callbacks(self, callbacks: Iterable[Callback]) -> None:
         """批量合并回调函数到当前管理器中"""
-        if not callbacks:
-            return
-
-        for cb in callbacks:
-            if not isinstance(cb, Callback):
-                raise TypeError(f"Expected swanlab.Callback, got {type(cb).__name__}")
-
-            if cb.name in self._callbacks:
-                console.warning(f"Callback '{cb.name}' is already registered and will be overwritten.")
-
-            self._callbacks[cb.name] = cb
+        pass
 
     def remove_callback(self, name: str) -> None:
         """根据名称移除指定的回调函数"""
@@ -83,7 +73,7 @@ else:
 
 
 def create_callback_manager() -> CallbackManager:
-    return CallbackManager()
+    pass
 
 
 __all__ = ["callbacker", "CallbackManager", "create_callback_manager"]

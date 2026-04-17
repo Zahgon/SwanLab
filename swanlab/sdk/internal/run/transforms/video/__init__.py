@@ -51,65 +51,15 @@ class Video(TransformMedia):
         caption: str, optional
             Caption for the video.
         """
-        super().__init__()
-
-        # 套娃加载
-        attrs = self._unwrap(data_or_path)
-        if attrs:
-            self.buffer: BytesIO = attrs["buffer"]
-            self.format: str = attrs["format"]
-            self.caption: Optional[str] = caption if caption is not None else attrs.get("caption")
-            return
-
-        # 1. 文件路径
-        if isinstance(data_or_path, str):
-            ext = Path(data_or_path).suffix.lower()
-            if ext not in _EXT_TO_FORMAT:
-                supported = ", ".join(_EXT_TO_FORMAT)
-                raise TypeError(f"Unsupported file extension '{ext}'. Supported: {supported}")
-            try:
-                with open(data_or_path, "rb") as f:
-                    raw = f.read()
-            except OSError as e:
-                raise ValueError(f"Failed to open file: {data_or_path!r}") from e
-            fmt = _detect_format_by_magic(raw)
-            if fmt is None:
-                raise TypeError(f"File '{data_or_path}' does not match any known video format magic number.")
-            self.format = fmt
-
-        # 2. bytes 或 BytesIO
-        elif isinstance(data_or_path, (bytes, BytesIO)):
-            raw = data_or_path if isinstance(data_or_path, bytes) else data_or_path.read()
-            fmt = _detect_format_by_magic(raw)
-            if fmt is None:
-                supported = ", ".join(_FORMAT_MAGIC)
-                raise TypeError(f"Cannot detect video format from bytes. Supported formats: {supported}")
-            self.format = fmt
-
-        # 3. 其他类型
-        else:
-            supported = ", ".join(_EXT_TO_FORMAT)
-            raise TypeError(
-                f"Unsupported type: {type(data_or_path).__name__}. "
-                f"Please provide a file path ({supported}), bytes, or BytesIO."
-            )
-
-        self.buffer = BytesIO(raw)
-        self.caption = caption
+        pass
 
     @classmethod
     def column_type(cls) -> ColumnType:
-        return ColumnType.COLUMN_TYPE_VIDEO
+        pass
 
     @classmethod
     def build_data_record(cls, *, key: str, step: int, timestamp: Timestamp, data: List[VideoItem]) -> DataRecord:
-        return DataRecord(
-            key=key, step=step, timestamp=timestamp, type=cls.column_type(), videos=VideoValue(items=data)
-        )
+        pass
 
     def transform(self, *, step: int, path: Path) -> VideoItem:
-        content = self.buffer.getvalue()
-        sha256 = hashlib.sha256(content).hexdigest()
-        filename = f"{step:03d}-{sha256[:8]}.{self.format}"
-        fs.safe_write(path / filename, content, mode="wb")
-        return VideoItem(filename=filename, sha256=sha256, size=len(content), caption=self.caption or "")
+        pass

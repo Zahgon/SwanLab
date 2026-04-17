@@ -38,9 +38,7 @@ def generate_id(length: int = 8, characters=string.ascii_lowercase + string.digi
         >>> len(run_id)
         16
     """
-    if length <= 0 or length > 64:
-        raise ValueError("Length must be between 1 and 64.")
-    return "".join(secrets.choice(characters) for _ in range(length))
+    pass
 
 
 PRESET_COLORS = [
@@ -97,28 +95,7 @@ def generate_color(slug: Optional[Union[Literal["beauty"], int]] = None) -> str:
         '#dfb142'
     """
     # 逻辑 1: 如果传入是 None，随机取一个内部列表中的值
-    if slug is None:
-        return random.choice(PRESET_COLORS)
-
-    # 逻辑 2: 如果设置为 "beauty"，根据漂亮颜色算法返回一个颜色
-    if slug == "beauty":
-        # 漂亮颜色算法：在 HSV 空间中固定适中的饱和度(S)和较高的明度(V)，随机生成色相(H)
-        h = random.random()  # 色相：0.0 到 1.0 的随机值（涵盖所有色调）
-        s = random.uniform(0.4, 0.6)  # 饱和度：0.4-0.6 之间，色彩柔和不刺眼
-        v = random.uniform(0.85, 1.0)  # 明度：0.85-1.0 之间，保持颜色明亮清透
-
-        # 将 HSV 转换为 RGB (结果为 0.0 到 1.0 的浮点数)
-        r, g, b = colorsys.hsv_to_rgb(h, s, v)
-
-        # 转换为 16 进制字符串并格式化
-        return f"#{int(r * 255):02x}{int(g * 255):02x}{int(b * 255):02x}"
-
-    # 逻辑 3: 如果传入是 int，根据预设的内部颜色列表取模
-    if isinstance(slug, int):
-        return PRESET_COLORS[slug % len(PRESET_COLORS)]
-
-    # 兜底机制（防范类型注解未生效的情况）
-    return "#000000"
+    pass
 
 
 # 纯粹的动物名词列表
@@ -199,23 +176,4 @@ def generate_name(slug: Optional[Union[Literal["beauty"], int]] = None) -> str:
         'goat-128'
     """
     # 逻辑 1: 如果传入是 None，随机动物 + 4位随机字符后缀
-    if slug is None:
-        animal = random.choice(PRESET_ANIMALS)
-        random_hash = "".join(random.choices(string.ascii_lowercase + string.digits, k=4))
-        return f"{animal}-{random_hash}"
-
-    # 逻辑 2: 如果设置为 "beauty"，生成形容词+动物+数字的组合
-    if slug == "beauty":
-        adj = random.choice(BEAUTY_ADJECTIVES)
-        animal = random.choice(PRESET_ANIMALS)
-        number = random.randint(10, 99)
-        return f"{adj}-{animal}-{number}"
-
-    # 逻辑 3: 如果传入是 int，根据预设列表取模，并将 ID 拼在尾部
-    if isinstance(slug, int):
-        animal = PRESET_ANIMALS[slug % len(PRESET_ANIMALS)]
-        return f"{animal}-{slug}"
-
-    # 兜底机制
-    fallback_hash = "".join(random.choices(string.ascii_lowercase + string.digits, k=4))
-    return f"unknown-{fallback_hash}"
+    pass

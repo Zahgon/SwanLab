@@ -16,6 +16,4 @@ from swanlab import sdk
 @click.option("--local", is_flag=True, help="Verify local login status (check .swanlab in current directory)")
 def verify(local: bool):
     """Verify the current login status."""
-    success = sdk.verify_cli(save="local" if local else "root")
-    if not success:
-        sys.exit(1)
+    pass

@@ -19,14 +19,7 @@ class ApiError(HTTPError):
     """
 
     def __init__(self, response, *, method: str, trace_id: str, code: Union[int, str], message: str):
-        self.response = response
-        self.code = code
-        self.message = message
-        self.trace_id = trace_id
-        self.request = response.request
-        # 构造友好的报错信息
-        error_str = f"API Request Failed: [{code}] {message} | Trace ID: {trace_id} | {method} {response.url}"
-        super().__init__(error_str, response=response)
+        pass
 
 
 class AuthenticationError(Exception):

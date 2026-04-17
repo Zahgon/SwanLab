@@ -89,44 +89,4 @@ _SUBMODULE_IMPORTS = {
 
 # 6. Module-level __getattr__ for lazy loading (PEP 562)
 def __getattr__(name: str) -> Any:
-    if name in _LAZY_IMPORTS:
-        module_path = _LAZY_IMPORTS[name]
-
-        try:
-            # Handle relative imports for internal integration modules
-            if module_path.startswith("."):
-                module = importlib.import_module(module_path, package=__name__)
-                obj = getattr(module, name)
-            else:
-                # Handle direct third-party library imports
-                obj = importlib.import_module(module_path)
-
-            # Import required submodules so their attributes are accessible on the parent package
-            for submodule_path in _SUBMODULE_IMPORTS.get(name, []):
-                importlib.import_module(submodule_path)
-
-            # Cache the imported object in the module's global namespace
-            globals()[name] = obj
-            return obj
-
-        except ImportError as e:
-            extra_tag = _EXTRA_DEPS.get(name)
-
-            if extra_tag:
-                error_msg = (
-                    f"The '{name}' feature requires additional dependencies. "
-                    f"To enable it, please install the '{extra_tag}' extra by running:\n"
-                    f'    pip install "swanlab[{extra_tag}]"'
-                )
-            else:
-                # Fallback: if not mapped in _EXTRA_DEPS, suggest the underlying package
-                underlying_pkg = module_path.strip(".")
-                error_msg = (
-                    f"The '{name}' feature requires the '{underlying_pkg}' package, "
-                    f"which is not currently installed. Please install it by running:\n"
-                    f"    pip install {underlying_pkg}"
-                )
-
-            raise ImportError(error_msg) from e
-
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    pass
