@@ -17,7 +17,10 @@ from pydantic import BaseModel, ConfigDict, DirectoryPath, Field
 
 def get_default_system_drive() -> Path:
     # Windows 系统下，SystemDrive 环境变量默认为 C:，需要手动添加末尾的斜杠
-    pass
+    drive = os.getenv("SystemDrive")
+    if drive:
+        return Path(drive + os.sep)
+    return Path("/")
 
 
 class EnvironmentSettings(BaseModel):

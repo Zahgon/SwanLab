@@ -20,17 +20,17 @@ from swanlab.sdk.typings.run import ResumeType
 
 def project_name_factory() -> Optional[str]:
     # 向下兼容旧版本环境变量
-    pass
+    return os.getenv("SWANLAB_PROJECT") or None
 
 
 def workspace_factory() -> Optional[str]:
     # 向下兼容旧版本环境变量
-    pass
+    return os.getenv("SWANLAB_WORKSPACE") or None
 
 
 def project_public_factory() -> bool:
     # 向下兼容旧版本环境变量
-    pass
+    return os.getenv("SWANLAB_PROJECT_PUBLIC", "").lower() in ("1", "true", "yes")
 
 
 class ProjectSettings(BaseModel):
@@ -58,32 +58,40 @@ class ProjectSettings(BaseModel):
 
 def experiment_name_factory() -> Optional[str]:
     # 向下兼容旧版本环境变量
-    pass
+    return os.getenv("SWANLAB_EXPERIMENT_NAME") or None
 
 
 def experiment_color_factory() -> Optional[str]:
     # 向下兼容旧版本环境变量
-    pass
+    return os.getenv("SWANLAB_EXPERIMENT_COLOR") or None
 
 
 def experiment_description_factory() -> Optional[str]:
     # 向下兼容旧版本环境变量
-    pass
+    return os.getenv("SWANLAB_EXPERIMENT_DESCRIPTION") or None
 
 
 def experiment_tags_factory() -> List[str]:
     # 向下兼容旧版本环境变量
-    pass
+    raw = os.getenv("SWANLAB_EXPERIMENT_TAGS")
+    if raw:
+        try:
+            parsed = json.loads(raw)
+            if isinstance(parsed, list):
+                return [str(t) for t in parsed]
+        except (json.JSONDecodeError, TypeError):
+            return [t.strip() for t in raw.split(",") if t.strip()]
+    return []
 
 
 def experiment_group_factory() -> Optional[str]:
     # 向下兼容旧版本环境变量
-    pass
+    return os.getenv("SWANLAB_EXPERIMENT_GROUP") or None
 
 
 def experiment_job_type_factory() -> Optional[str]:
     # 向下兼容旧版本环境变量
-    pass
+    return os.getenv("SWANLAB_EXPERIMENT_JOB_TYPE") or None
 
 
 Tags = Field(default_factory=experiment_tags_factory, max_length=50, validate_default=True)
@@ -124,7 +132,19 @@ class ExperimentSettings(BaseModel):
         """
         自定义标签解析，同时支持JSON、逗号分隔的字符串等格式
         """
-        pass
+        if v is None:
+            return []
+        if isinstance(v, list):
+            return [str(t) for t in v]
+        if isinstance(v, str):
+            try:
+                parsed = json.loads(v)
+                if isinstance(parsed, list):
+                    return [str(t) for t in parsed]
+            except (json.JSONDecodeError, TypeError):
+                pass
+            return [t.strip() for t in v.split(",") if t.strip()]
+        return []
 
     group: Optional[const.Group] = Field(default_factory=experiment_group_factory, validate_default=True)
     """
@@ -139,12 +159,15 @@ class ExperimentSettings(BaseModel):
 
 def run_id_factory() -> Optional[str]:
     # 向下兼容旧版本环境变量
-    pass
+    return os.getenv("SWANLAB_RUN_ID") or None
 
 
 def run_resume_factory() -> ResumeType:
     # 向下兼容旧版本环境变量
-    pass
+    raw = os.getenv("SWANLAB_RESUME")
+    if raw:
+        return map_resume_value(raw)
+    return "never"
 
 
 def map_resume_value(value: Any) -> ResumeType:
@@ -191,6 +214,8 @@ class RunSettings(BaseModel):
 
     @field_validator("resume", mode="before")
     def validate_resume(cls, v: Any) -> Any:
-        pass
+        if v is None:
+            return "never"
+        return map_resume_value(v)
 
     config: Optional[Path] = Field(default=None)

@@ -13,27 +13,33 @@ from pydantic import BaseModel, Field, model_validator
 
 def webhook_url_factory() -> str:
     # 使用额外的 SWANLAB_WEBHOOK 环境变量，一方面是为了向下兼容（老版本是 SWANLAB_WEBHOOK），另一方面是自动生成的环境变量太长了
-    pass
+    return os.getenv("SWANLAB_WEBHOOK", "")
 
 
 def webhook_value_factory() -> str:
     # 使用额外的 SWANLAB_WEBHOOK_VALUE 环境变量，一方面是为了向下兼容（老版本是 SWANLAB_WEBHOOK_VALUE），另一方面是自动生成的环境变量太长了
-    pass
+    return os.getenv("SWANLAB_WEBHOOK_VALUE", "")
 
 
 def webhook_timeout_factory() -> int:
     # 使用额外的 SWANLAB_WEBHOOK_TIMEOUT 环境变量，因为自动生成的环境变量太长了
-    pass
+    raw = os.getenv("SWANLAB_WEBHOOK_TIMEOUT")
+    if raw and raw.isdigit():
+        return int(raw)
+    return 30
 
 
 def dashboard_host_factory() -> str:
     # 使用额外的 SWANLAB_DASHBOARD_HOST 环境变量，因为自动生成的环境变量太长了
-    pass
+    return os.getenv("SWANLAB_DASHBOARD_HOST", "127.0.0.1")
 
 
 def dashboard_port_factory() -> int:
     # 使用额外的 SWANLAB_DASHBOARD_PORT 环境变量，因为自动生成的环境变量太长了
-    pass
+    raw = os.getenv("SWANLAB_DASHBOARD_PORT")
+    if raw and raw.isdigit():
+        return int(raw)
+    return 5092
 
 
 class WebhookSettings(BaseModel):
@@ -83,4 +89,4 @@ class IntegrationSettings(BaseModel):
         拦截 Pydantic 因 max_split=1 截断生成的平铺环境变量，
         将其重新组装为嵌套字典，以适配内部结构。
         """
-        pass
+        return data if isinstance(data, dict) else {}

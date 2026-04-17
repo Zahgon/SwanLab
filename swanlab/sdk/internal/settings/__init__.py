@@ -55,11 +55,11 @@ CONFIG_DIR: str = config_dir_env or "/etc/swanlab"
 
 def root_factory() -> Path:
     # 向下兼容旧版本环境变量
-    pass
+    return Path.home() / ROOT_FOLDER
 
 
 def log_dir_factory() -> Path:
-    pass
+    return Path.home() / ROOT_FOLDER / "logs"
 
 
 class Settings(BaseSettings):
@@ -118,7 +118,7 @@ class Settings(BaseSettings):
 
     @field_validator("mode", mode="before")
     def validate_mode(cls, v: Any) -> ModeType:
-        pass
+        return v
 
     root: Path = Field(default_factory=root_factory)
     """
@@ -130,7 +130,7 @@ class Settings(BaseSettings):
         """
         如果 root 存在，必须是目录
         """
-        pass
+        return Path(v) if v is not None else root_factory()
 
     log_dir: Path = Field(default_factory=log_dir_factory, validate_default=True)
     """
@@ -144,7 +144,7 @@ class Settings(BaseSettings):
         """
         如果 log_dir 存在，必须是目录
         """
-        pass
+        return Path(v) if v is not None else log_dir_factory()
 
     api_key: Optional[str] = Field(default=None)
     """
@@ -167,7 +167,7 @@ class Settings(BaseSettings):
         删除空值和空字典，以适配传入None的情况，一般情况下此校验必须在其他model_validator之前定义
         如果出现部分字段需要识别None值，则在此校验之前定义model_validator
         """
-        pass
+        return data if isinstance(data, dict) else {}
 
     @model_validator(mode="before")
     @classmethod
@@ -177,7 +177,7 @@ class Settings(BaseSettings):
         在设计上，api_host 是最基础URL，但是有时候展示的前端URL和后端URL可能不一致
         所以在处理时，我们优先使用 api_host，然后根据需要（当没有显式配置 web_host 时）推导 web_host
         """
-        pass
+        return data if isinstance(data, dict) else {}
 
     @model_validator(mode="after")
     def load_api_key(self) -> "Settings":
@@ -195,7 +195,7 @@ class Settings(BaseSettings):
         - login (username) -> web_host
         - password -> api_key
         """
-        pass
+        return self
 
     project: ProjectSettings = Field(default_factory=ProjectSettings)
     """
@@ -258,7 +258,7 @@ class Settings(BaseSettings):
         # 5. file_secret_settings (容器 Secrets)
         # 6. env_settings (环境变量)
         # 7. 默认值 (Model Default)
-        pass
+        return (init_settings,)
 
     def merge_settings(self, other: Union["Settings", dict]) -> None:
         """
