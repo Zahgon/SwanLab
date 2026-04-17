@@ -131,7 +131,7 @@ def _loguru_print(level_name: str, style: str, *args, **kwargs) -> str:
 # noinspection PyShadowingBuiltins
 def print(*args, **kwargs):  # noqa: A001
     """发送普通消息"""
-    c.print(*args, **kwargs)
+    pass
 
 
 def debug(*args, write_to_file: bool = True, **kwargs):

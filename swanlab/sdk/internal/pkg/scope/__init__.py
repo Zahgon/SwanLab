@@ -54,7 +54,7 @@ class Scope:
 
     def set(self, key: str, value: Any) -> None:
         """向当前 Scope 中写入数据"""
-        self.data[key] = value
+        pass
 
     def get(self, key: str, default: Any = None) -> Any:
         """

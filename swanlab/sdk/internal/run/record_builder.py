@@ -58,24 +58,12 @@ class RecordBuilder:
         """媒体对象数组
         dispatch 并不能识别每个数组元素的类型，因此还需手动检查
         """
-        if not value or not isinstance(value[0], TransformMedia):
-            raise TypeError("List must contain TransformMediaType objects")
-        cls = value[0].__class__
-        if not all(isinstance(item, cls) for item in value):
-            raise TypeError(f"All items in the list must be of the same type {cls.__name__}, got mixed types.")
-        path = self._ctx.media_dir / adapter.column_type[cls.column_type()]
-        fs.safe_mkdir(path)
-        values = [item.transform(step=step, path=path) for item in value]
-        return self._wrap(metric=cls.build_data_record(key=key, step=step, timestamp=timestamp, data=values)), cls
+        pass
 
     @build_log.register(TransformMedia)
     def _(self, value: TransformMedia, key: str, timestamp: Timestamp, step: int) -> ParseResult:
         """将单个 TransformMediaType 转换为 DataRecord"""
-        cls = value.__class__
-        path = self._ctx.media_dir / adapter.column_type[cls.column_type()]
-        fs.safe_mkdir(path)
-        values = [value.transform(step=step, path=path)]
-        return self._wrap(metric=cls.build_data_record(key=key, step=step, timestamp=timestamp, data=values)), cls
+        pass
 
     def build_column_from_log(self, cls: Type[TransformData], key: str) -> Record:
         """隐式创建列：从 TransformType 推断 ColumnType，并同步 RunMetrics"""

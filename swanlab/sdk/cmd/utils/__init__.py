@@ -46,8 +46,7 @@ def with_loading_animation(message: str = "Initializing SwanLab...", spinner_nam
         @wraps(func)
         def wrapper(*args, **kwargs):
             # 使用 rich 的 status 作为上下文管理器包裹函数的执行
-            with console.c.status(message, spinner=spinner_name):
-                return func(*args, **kwargs)
+            pass
 
         return wrapper
 

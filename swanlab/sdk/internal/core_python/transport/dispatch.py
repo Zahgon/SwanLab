@@ -55,29 +55,11 @@ class Dispatch:
 
     def _upload_record_type(self, record_type: str, records: List[Record]) -> Tuple[bool, List[Record]]:
         """上传单个 record_type 分组，返回 (是否成功, 当前分组剩余的 records)。"""
-        if record_type not in self._RECORD_TYPES:
-            console.warning(f"No handler for record kind={record_type!r}, skipping {len(records)} records.")
-            return True, []
-
-        uploaded_record_count = 0
-        for chunk, chunk_size in generate_chunks(records, _MAX_RECORDS_PER_REQUEST):
-            success = self._upload_chunk(record_type, chunk)
-            if success:
-                uploaded_record_count += chunk_size
-                if self._upload_callback:
-                    self._upload_callback(chunk_size)
-            else:
-                return False, records[uploaded_record_count:]
-        return True, []
+        pass
 
     def _upload_chunk(self, record_type: str, chunk: Sequence[Record]) -> bool:
         """单 chunk 上传。返回 True 表示成功，False 表示失败。"""
-        if self._sender is None:
-            raise RuntimeError("sender not set")
-        with safe_block(message=f"record chunk upload failed, record_type={record_type!r}"):
-            self._sender.upload(record_type, chunk)
-            return True
-        return False
+        pass
 
 
 __all__ = [

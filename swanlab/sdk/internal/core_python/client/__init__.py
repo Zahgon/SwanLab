@@ -67,4 +67,4 @@ def patch(url: str, data: Optional[dict] = None, retries: Optional[int] = None):
 
 
 def delete(url: str, retries: Optional[int] = None):
-    return _get_client().delete(url, retries=retries)
+    pass

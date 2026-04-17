@@ -63,14 +63,7 @@ class SecureRotatingFileHandler(RotatingFileHandler):
     """
 
     def _open(self):
-        stream = super()._open()
-
-        # 仅在类 Unix 系统（Linux/macOS）上应用 POSIX 权限
-        if os.name == "posix":
-            os.chmod(self.baseFilename, 0o600)
-
-        # 注意：Windows 环境下多为个人开发机，且 os.chmod 无法操作 ACL，故跳过
-        return stream
+        pass
 
 
 def reset() -> None:
@@ -116,40 +109,7 @@ def bindfile(log_dir: Path) -> None:
     :param log_dir: 日志目录路径，调用方需确保目录已创建
     :raises FileNotFoundError: 如果 log_dir 不存在
     """
-    global _memory_handler, _file_handler, _bound
-
-    if _bound:
-        return
-
-    log_dir = Path(log_dir)
-    if not log_dir.exists():
-        raise FileNotFoundError(f"Log directory does not exist: {log_dir}")
-
-    # 1. 创建文件 Handler
-    log_path = log_dir / _LOG_FILENAME
-    _file_handler = SecureRotatingFileHandler(
-        filename=str(log_path),
-        maxBytes=_MAX_BYTES,
-        backupCount=_BACKUP_COUNT,
-        encoding="utf-8",
-    )
-    _file_handler.setFormatter(_FORMATTER)
-    _file_handler.setLevel(logging.DEBUG)
-
-    # 2. 将内存缓冲的日志 flush 到文件
-    if _memory_handler is not None:
-        _memory_handler.setTarget(_file_handler)
-        _memory_handler.flush()
-        # 移除内存 Handler，释放缓冲区
-        _logger.removeHandler(_memory_handler)
-        _memory_handler.close()
-        _memory_handler = None
-
-    # 3. 挂载文件 Handler
-    _logger.addHandler(_file_handler)
-    _bound = True
-
-    _logger.debug("Diagnostic log bound to file: %s", log_path)
+    pass
 
 
 # ---------------------------------------------------------------------------
@@ -180,4 +140,4 @@ def error(msg: str, *args) -> None:
 
 def critical(msg: str, *args) -> None:
     """记录致命级别的诊断日志"""
-    _logger.critical(msg, *args)
+    pass

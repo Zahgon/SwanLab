@@ -33,7 +33,7 @@ class NullEmitter(EmitterProtocol):
 
     @property
     def queue(self) -> RunQueue:
-        return self._queue
+        pass
 
 
 def factory_emitter(ctx: RunContext) -> EmitterProtocol:

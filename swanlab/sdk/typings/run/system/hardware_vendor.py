@@ -35,11 +35,7 @@ class CollectorProtocol(ABC):
         self._handlers: List[Tuple[str, Callable[[], Union[int, float]]]] = []
 
     def collect(self) -> List[CollectResult]:
-        results = []
-        for key, handler in self._handlers:
-            with safe.block(message=f"Failed to collect while calling {handler.__name__}"):
-                results.append((key, handler()))
-        return results
+        pass
 
 
 class CpuProtocol(CollectorProtocol):

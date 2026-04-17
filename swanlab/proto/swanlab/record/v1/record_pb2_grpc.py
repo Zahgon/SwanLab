@@ -61,47 +61,21 @@ class RecordServiceServicer(object):
     def RunStart(self, request, context):
         """RunStart 接收单条 StartRequest，用于实验开始，并返回必要的信息。
         """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        pass
 
     def UpsertRecord(self, request, context):
         """UpsertRecord 接收单条 Record 并写入，用于实验数据的上报。
         """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        pass
 
     def RunFinish(self, request, context):
         """RunFinish 接收单条 FinishRequest，用于实验结束。
         """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        pass
 
 
 def add_RecordServiceServicer_to_server(servicer, server):
-    rpc_method_handlers = {
-            'RunStart': grpc.unary_unary_rpc_method_handler(
-                    servicer.RunStart,
-                    request_deserializer=swanlab_dot_run_dot_v1_dot_run__pb2.StartRequest.FromString,
-                    response_serializer=swanlab_dot_run_dot_v1_dot_run__pb2.StartResponse.SerializeToString,
-            ),
-            'UpsertRecord': grpc.unary_unary_rpc_method_handler(
-                    servicer.UpsertRecord,
-                    request_deserializer=swanlab_dot_record_dot_v1_dot_record__pb2.Record.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
-            ),
-            'RunFinish': grpc.unary_unary_rpc_method_handler(
-                    servicer.RunFinish,
-                    request_deserializer=swanlab_dot_run_dot_v1_dot_run__pb2.FinishRequest.FromString,
-                    response_serializer=swanlab_dot_run_dot_v1_dot_run__pb2.FinishResponse.SerializeToString,
-            ),
-    }
-    generic_handler = grpc.method_handlers_generic_handler(
-            'swanlab.record.v1.RecordService', rpc_method_handlers)
-    server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('swanlab.record.v1.RecordService', rpc_method_handlers)
+    pass
 
 
  # This class is part of an EXPERIMENTAL API.
@@ -120,21 +94,7 @@ class RecordService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/swanlab.record.v1.RecordService/RunStart',
-            swanlab_dot_run_dot_v1_dot_run__pb2.StartRequest.SerializeToString,
-            swanlab_dot_run_dot_v1_dot_run__pb2.StartResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
+        pass
 
     @staticmethod
     def UpsertRecord(request,
@@ -147,21 +107,7 @@ class RecordService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/swanlab.record.v1.RecordService/UpsertRecord',
-            swanlab_dot_record_dot_v1_dot_record__pb2.Record.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
+        pass
 
     @staticmethod
     def RunFinish(request,
@@ -174,18 +120,4 @@ class RecordService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/swanlab.record.v1.RecordService/RunFinish',
-            swanlab_dot_run_dot_v1_dot_run__pb2.FinishRequest.SerializeToString,
-            swanlab_dot_run_dot_v1_dot_run__pb2.FinishResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
+        pass

@@ -39,10 +39,7 @@ class RecordBuffer:
 
     def prepend(self, records: List[Record]) -> int:
         """回滚到头部，自动按 num 去重。返回实际入队的数量。"""
-        accepted_records = [record for record in records if self._try_enqueue(record)]
-        if accepted_records:
-            self._records[:0] = accepted_records
-        return len(accepted_records)
+        pass
 
     def _try_enqueue(self, record: Record) -> bool:
         """根据 record num 去重，未存在则注册并返回 True。"""
@@ -55,10 +52,7 @@ class RecordBuffer:
 
     def drain(self) -> List[Record]:
         """取出全部 records 并清空缓冲区（含索引）。"""
-        pending_records = self._records[:]
-        self._records.clear()
-        self._record_num_index.clear()
-        return pending_records
+        pass
 
 
 __all__ = [

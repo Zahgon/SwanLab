@@ -37,21 +37,7 @@ class TimeoutHTTPAdapter(HTTPAdapter):
         super().__init__(*args, **kwargs)
 
     def send(self, request, *args, **kwargs):
-        if self.timeout is not None:
-            kwargs.setdefault("timeout", self.timeout)
-
-        # 2. 直接从上下文中读取 retries，无需触碰 request.headers
-        retries = request_retries_ctx.get()
-
-        if retries is not None:
-            if not isinstance(retries, int) or retries < 0:
-                raise ValueError(f"Invalid retry count: '{retries}'. Must be a non-negative integer.")
-
-            adapter = copy.copy(self)
-            adapter.max_retries = self.max_retries.new(total=retries)
-            return super(TimeoutHTTPAdapter, adapter).send(request, **kwargs)
-
-        return super().send(request, *args, **kwargs)
+        pass
 
 
 class SessionWithRetry(Session):
@@ -78,38 +64,7 @@ class SessionWithRetry(Session):
         """
         重写底层发送方法，统一处理所有响应的校验逻辑和网络日志记录
         """
-        method = (request.method or "unknown").upper()
-        start = time.perf_counter()
-
-        # 调用父类（或 Adapter）获取响应
-        response = super().send(request, **kwargs)
-
-        elapsed_ms = (time.perf_counter() - start) * 1000
-        trace_id = response.headers.get("traceid", "unknown")
-
-        # 1. 2xx 响应：直接放行
-        if response.ok:
-            return response
-
-        # 2. 非 2xx 响应：准备 Fallback 默认值
-        error_code = "unknown code"
-        error_message = "unknown error"
-
-        # 3. 尝试解码后端详细错误信息（安全调用，失败返回 None）
-        decoded = decode_error_response(response)
-        if decoded is not None:
-            error_code, error_message = decoded
-
-        # 4. 记录错误日志
-        # 对于 POST /api/project 接口不记录错误日志，因为是预期行为
-        # FIXME 等待后端新增专用接口后删除此特殊处理
-        if not (method == "POST" and request.url.endswith("/api/project")):
-            console.error(
-                f"[HTTP] {method} {request.url} -> {response.status_code} ({elapsed_ms:.0f}ms) trace:{trace_id}"
-                f" | [ERR] code={error_code} message={error_message}"
-            )
-        # 5. 抛出友好的自定义 ApiError
-        raise ApiError(response, method=method, trace_id=trace_id, code=error_code, message=error_message)
+        pass
 
     # ---------------------------------- 类型提示占位符，保留以保证 IDE 友好 ----------------------------------
 
@@ -117,10 +72,10 @@ class SessionWithRetry(Session):
         return self.request("GET", url, params=params, retries=retries, **kwargs)
 
     def options(self, url, retries: Optional[int] = None, **kwargs):
-        return self.request("OPTIONS", url, retries=retries, **kwargs)
+        pass
 
     def head(self, url, retries: Optional[int] = None, **kwargs):
-        return self.request("HEAD", url, retries=retries, **kwargs)
+        pass
 
     def post(self, url, data=None, json=None, retries: Optional[int] = None, **kwargs):
         return self.request("POST", url, data=data, json=json, retries=retries, **kwargs)
@@ -132,7 +87,7 @@ class SessionWithRetry(Session):
         return self.request("PATCH", url, data=data, retries=retries, **kwargs)
 
     def delete(self, url, retries: Optional[int] = None, **kwargs):
-        return self.request("DELETE", url, retries=retries, **kwargs)
+        pass
 
 
 def create(timeout: int = 60, default_retry: int = 5) -> SessionWithRetry:

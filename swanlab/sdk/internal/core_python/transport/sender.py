@@ -16,41 +16,37 @@ class HttpRecordSender:
 
     def upload(self, record_type: str, records: Sequence[Record]) -> None:
         """通用上传入口，按 record_type 路由到对应 upload_{kind} 方法。"""
-        if len(records) == 0:
-            return
-        fn = getattr(self, f"upload_{record_type}", None)
-        if fn is not None:
-            fn(records)
+        pass
 
     def upload_start(self, records: Sequence[Record]) -> None:
-        console.debug("HTTP upload skeleton: upload_start (request mapping pending).")
+        pass
 
     def upload_run(self, records: Sequence[Record]) -> None:
-        self.upload_start(records)
+        pass
 
     def upload_finish(self, records: Sequence[Record]) -> None:
-        console.debug("HTTP upload skeleton: upload_finish (request mapping pending).")
+        pass
 
     def upload_column(self, records: Sequence[Record]) -> None:
-        console.debug("HTTP upload skeleton: upload_column (request mapping pending).")
+        pass
 
     def upload_metric(self, records: Sequence[Record]) -> None:
-        console.debug("HTTP upload skeleton: upload_metric (request mapping pending).")
+        pass
 
     def upload_config(self, records: Sequence[Record]) -> None:
-        console.debug("HTTP upload skeleton: upload_config (request mapping pending).")
+        pass
 
     def upload_console(self, records: Sequence[Record]) -> None:
-        console.debug("HTTP upload skeleton: upload_console (request mapping pending).")
+        pass
 
     def upload_metadata(self, records: Sequence[Record]) -> None:
-        console.debug("HTTP upload skeleton: upload_metadata (request mapping pending).")
+        pass
 
     def upload_requirements(self, records: Sequence[Record]) -> None:
-        console.debug("HTTP upload skeleton: upload_requirements (request mapping pending).")
+        pass
 
     def upload_conda(self, records: Sequence[Record]) -> None:
-        console.debug("HTTP upload skeleton: upload_conda (request mapping pending).")
+        pass
 
     def close(self) -> None:
         pass

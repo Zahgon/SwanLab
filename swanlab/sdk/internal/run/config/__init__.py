@@ -107,28 +107,19 @@ class Config(MutableMapping):
         绑定运行上下文。将内存中已有的 config 全量 flush 到文件，
         之后的每次写操作均实时同步。可安全重复调用（幂等）。
         """
-        with _lock:
-            if self._bound:
-                return
-            self.__dict__.update({"_file": config_file, "_emit": emit, "_bound": True})
-            self._flush(UpdateType.UPDATE_TYPE_INIT)
+        pass
 
     def _reset(self) -> None:
         """重置为初始状态，用于测试隔离或下一次 init 前的清理。"""
-        with _lock:
-            self._config.clear()
-            self._sort.clear()
-            self.__dict__.update({"_seq": 0, "_file": None, "_emit": None, "_bound": False})
+        pass
 
     def _snapshot(self) -> tuple[dict, dict, int]:
         """深拷贝内部状态（config、sort、seq），供 create_run_config 使用。"""
-        return copy.deepcopy(self._config), dict(self._sort), self._seq
+        pass
 
     def _copy_from(self, source: "Config") -> None:
         """从 source 复制数据，仅在 self 未绑定时调用（无 IO）。"""
-        assert not self._bound, "Cannot run config copy_from() on a bound config"
-        cfg, sort, seq = source._snapshot()
-        self.__dict__.update({"_config": cfg, "_sort": sort, "_seq": seq})
+        pass
 
     # ------------------------------------------------------------------
     # MutableMapping 接口
@@ -245,7 +236,7 @@ class Config(MutableMapping):
             >>> config.set("lr", 0.01)
             >>> config.set("model_name", "resnet50")
         """
-        self[str(name)] = value
+        pass
 
     def pop(self, key: str, *args) -> Any:
         """
@@ -284,12 +275,7 @@ class Config(MutableMapping):
             >>> len(config)
             0
         """
-        with _lock:
-            self._config.clear()
-            self._sort.clear()
-            self.__dict__["_seq"] = 0
-            if self._bound:
-                self._flush(UpdateType.UPDATE_TYPE_PATCH)
+        pass
 
 
 # ------------------------------------------------------------------
@@ -302,7 +288,7 @@ class _ConfigProxy:
 
     @property
     def _target(self) -> Config:
-        return _active_run_config if _active_run_config is not None else _global_config
+        pass
 
     def __getitem__(self, key):
         return self._target[key]

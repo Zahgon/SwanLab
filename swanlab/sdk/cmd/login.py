@@ -143,7 +143,7 @@ def login_raw(
 
 
 def create_client(api_key: str, api_host: str, timeout: int = 10):
-    return client.new(api_key, api_host, timeout=timeout)
+    pass
 
 
 def login_cli(

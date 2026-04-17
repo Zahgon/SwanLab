@@ -34,10 +34,7 @@ _EXT_TO_FORMAT: dict[str, str] = {
 
 def _detect_format_by_magic(data: bytes) -> Optional[str]:
     """根据魔数推断格式，无法识别则返回 None"""
-    for fmt, magics in _FORMAT_MAGIC.items():
-        if any(data.startswith(m) for m in magics):
-            return fmt
-    return None
+    pass
 
 
 class Video(TransformMedia):

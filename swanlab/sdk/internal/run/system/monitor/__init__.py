@@ -42,7 +42,7 @@ def is_system_key(key: str):
     :param key: 指标key
     :return: 是否是系统指标key
     """
-    return key.startswith(_SYSTEM_KEY_PREFIX)
+    pass
 
 
 class Monitor:
@@ -103,18 +103,7 @@ class Monitor:
         self._executor = ThreadPoolExecutor(max_workers=2)
 
         def task():
-            assert self._executor is not None, "Monitor Executor is not initialized"
-            futures = [(n, self._executor.submit(fn)) for n, fn in all_handlers]
-            results: List[CollectResult] = []
-            for n, f in futures:
-                with safe.block(message=f"Error collecting metric via {n}"):
-                    result = f.result()
-                    results.extend(result)
-            ts = Timestamp()
-            ts.GetCurrentTime()
-            step = ctx.metrics.next_system_step()
-            data = {fmt_system_key(k): v for k, v in results}
-            emitter.emit(MetricLogEvent(step=step, data=data, timestamp=ts))
+            pass
 
         # 不设置立即执行，以避免产生一些无用的数据
         self._timer = timer.Timer(

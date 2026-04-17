@@ -52,11 +52,7 @@ class DataStoreWriter:
 
     def open(self, filename: str) -> None:
         """创建并初始化文件，文件已存在时抛出 FileExistsError。"""
-        self._fp = open(filename, "xb")
-        header = struct.pack("<4sHB", LEVELDBLOG_HEADER_IDENT, LEVELDBLOG_HEADER_MAGIC, LEVELDBLOG_HEADER_VERSION)
-        assert len(header) == LEVELDBLOG_HEADER_LEN
-        self._fp.write(header)
-        self._index += len(header)
+        pass
 
     def write(self, data: bytes) -> None:
         """写入任意字节，遵循 LevelDB log 分块规范。"""
@@ -94,8 +90,7 @@ class DataStoreWriter:
         self._flush_offset = self._index
 
     def ensure_flushed(self) -> None:
-        assert self._fp is not None, "writer is not open"
-        self._fp.flush()
+        pass
 
     def close(self) -> None:
         assert self._fp is not None, "writer is not open"
@@ -129,37 +124,11 @@ class DataStoreReader:
 
     def open(self, filename: str) -> None:
         """打开文件并校验文件头。"""
-        self._fp = open(filename, "rb")
-        self._index = 0
-        self._read_header()
+        pass
 
     def scan(self) -> Optional[bytes]:
         """读取下一条完整记录，到达文件末尾时返回 None。"""
-        assert self._fp is not None, "reader is not open"
-        # 剩余空间不足一个 header：跳过填充字节
-        offset = self._index % LEVELDBLOG_BLOCK_LEN
-        space_left = LEVELDBLOG_BLOCK_LEN - offset
-        if space_left < LEVELDBLOG_HEADER_LEN:
-            pad = self._fp.read(space_left)
-            assert pad == b"\x00" * space_left, "invalid padding"
-            self._index += space_left
-        record = self._read_record()
-        if record is None:
-            return None
-        dtype, data = record
-        if dtype == LEVELDBLOG_FULL:
-            return data
-        # 分块记录：连续读取直到 LAST
-        assert dtype == LEVELDBLOG_FIRST, f"expected record type {LEVELDBLOG_FIRST}, got {dtype}"
-        while True:
-            record = self._read_record()
-            if record is None:
-                return None
-            dtype, chunk = record
-            data += chunk
-            if dtype == LEVELDBLOG_LAST:
-                return data
-            assert dtype == LEVELDBLOG_MIDDLE, f"expected record type {LEVELDBLOG_MIDDLE}, got {dtype}"
+        pass
 
     def close(self) -> None:
         assert self._fp is not None, "reader is not open"
@@ -177,34 +146,7 @@ class DataStoreReader:
         return record
 
     def _read_header(self) -> None:
-        assert self._fp is not None
-        header = self._fp.read(LEVELDBLOG_HEADER_LEN)
-        assert len(header) == LEVELDBLOG_HEADER_LEN, (
-            f"header is {len(header)} bytes instead of the expected {LEVELDBLOG_HEADER_LEN}"
-        )
-        ident, magic, version = struct.unpack("<4sHB", header)
-        if ident != LEVELDBLOG_HEADER_IDENT:
-            raise DataStoreError("Invalid header ident")
-        if magic != LEVELDBLOG_HEADER_MAGIC:
-            raise DataStoreError("Invalid header magic")
-        if version != LEVELDBLOG_HEADER_VERSION:
-            raise DataStoreError(
-                f"Invalid run version: {version}. For supported versions, see: https://docs.swanlab.cn/api/cli-swanlab-sync.html"
-            )
-        self._index += len(header)
+        pass
 
     def _read_record(self) -> Optional[Tuple[int, bytes]]:
-        assert self._fp is not None
-        header = self._fp.read(LEVELDBLOG_HEADER_LEN)
-        if len(header) == 0:
-            return None
-        assert len(header) == LEVELDBLOG_HEADER_LEN, (
-            f"record header is {len(header)} bytes instead of the expected {LEVELDBLOG_HEADER_LEN}"
-        )
-        checksum, data_length, data_type = struct.unpack("<IHB", header)
-        self._index += LEVELDBLOG_HEADER_LEN
-        data = self._fp.read(data_length)
-        if zlib.crc32(data, _CRC[data_type]) & 0xFFFFFFFF != checksum:
-            raise DataStoreError("Invalid record checksum, data may be corrupt")
-        self._index += data_length
-        return int(data_type), data
+        pass

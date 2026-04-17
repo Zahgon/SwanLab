@@ -108,4 +108,4 @@ class Client:
         return self.request("PATCH", url, json=data, retries=retries)
 
     def delete(self, url: str, retries: Optional[int] = None):
-        return self.request("DELETE", url, retries=retries)
+        pass

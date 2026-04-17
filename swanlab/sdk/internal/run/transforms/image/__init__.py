@@ -26,27 +26,12 @@ ACCEPT_FORMAT = ["png", "jpg", "jpeg", "bmp"]
 
 def _is_torch_tensor(obj) -> bool:
     """通过类型名检测 PyTorch Tensor，避免强制导入 torch"""
-    typename = obj.__class__.__module__ + "." + obj.__class__.__name__
-    return typename.startswith("torch.") and ("Tensor" in typename or "Variable" in typename)
+    pass
 
 
 def _resize(image: "vendor.PIL.Image.Image", size) -> "vendor.PIL.Image.Image":
     """按 size 参数缩放图像"""
-    if size is None:
-        return image
-    if isinstance(size, int):
-        if max(image.size) > size:
-            image.thumbnail((size, size))
-        return image
-    if isinstance(size, (list, tuple)):
-        w, h = (tuple(size) + (None,))[:2]
-        if w is not None and h is not None:
-            return image.resize((int(w), int(h)))
-        if w is not None:
-            return image.resize((int(w), int(image.size[1] * w / image.size[0])))
-        if h is not None:
-            return image.resize((int(image.size[0] * h / image.size[1]), int(h)))
-    raise ValueError("size must be an int, or a list/tuple with 1-2 elements")
+    pass
 
 
 class Image(TransformMedia):

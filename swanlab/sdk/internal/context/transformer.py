@@ -60,10 +60,7 @@ class TransformData(ABC):
     @classmethod
     def _unwrap(cls, instance_or_val: Any) -> dict:
         """通用的解包辅助函数，提取实例属性，用于实现套娃加载"""
-        if isinstance(instance_or_val, TransformData):
-            # 返回实例的所有属性（注意排除私有属性）
-            return {k: v for k, v in vars(instance_or_val).items() if not k.startswith("_")}
-        return {}
+        pass
 
     @abstractmethod
     def transform(self, *args: Any, **kwargs: Any) -> Message:

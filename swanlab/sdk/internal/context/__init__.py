@@ -54,41 +54,39 @@ class RunContext:
 
     @cached_property
     def run_dir(self) -> Path:
-        return self.config.run_dir
+        pass
 
     @cached_property
     def media_dir(self) -> Path:
-        return self.config.run_dir / adapter.dirname.media
+        pass
 
     @cached_property
     def debug_dir(self) -> Path:
-        return self.config.run_dir / adapter.dirname.debug
+        pass
 
     @cached_property
     def files_dir(self) -> Path:
-        return self.config.run_dir / adapter.dirname.files
+        pass
 
     @cached_property
     def metadata_file(self) -> Path:
-        return self.files_dir / adapter.filename.metadata
+        pass
 
     @cached_property
     def config_file(self) -> Path:
-        return self.files_dir / adapter.filename.config
+        pass
 
     @cached_property
     def requirements_file(self) -> Path:
-        return self.files_dir / adapter.filename.requirements
+        pass
 
     @cached_property
     def conda_file(self) -> Path:
-        return self.files_dir / adapter.filename.conda
+        pass
 
     @cached_property
     def run_file(self) -> Path:
-        run_id = self.config.settings.run.id
-        assert run_id, "Run ID is not set."
-        return self.config.run_dir / adapter.filename.run(run_id)
+        pass
 
 
 # ContextVar 现在只存这个轻量级的数据宿主
@@ -99,7 +97,7 @@ def has_context() -> bool:
     """
     检查SwanLab运行上下文是否已初始化。
     """
-    return _current_ctx.get() is not None
+    pass
 
 
 def get_context() -> RunContext:

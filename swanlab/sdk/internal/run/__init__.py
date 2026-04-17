@@ -62,17 +62,7 @@ def with_api(cmd: str, must_alive: bool = True):
     def decorator(f):
         @wraps(f)
         def wrapper(self: "Run", *args, **kwargs):
-            if self._forked:
-                # fork 后子进程继承的锁可能已持有，替换为新锁避免死锁
-                self._api_lock = threading.RLock()
-                raise RuntimeError(
-                    "SwanLab Run does not support fork yet. Use `multiprocessing.set_start_method('spawn')` "
-                    "or call `swanlab.init()` in the child process."
-                )
-            if must_alive and not self.alive:
-                raise RuntimeError(f"`{cmd}` requires an active Run, call `swanlab.init()` first.")
-            with self._api_lock:
-                return f(self, *args, **kwargs)
+            pass
 
         return wrapper
 
@@ -162,43 +152,15 @@ class Run:
         KeyboardInterrupt 可能无法正常传播到 excepthook。
         此 handler 作为额外防线，在信号层直接处理。
         """
-        if self.alive:
-            console.info("KeyboardInterrupt by user")
-            import traceback
-
-            stack = "".join(traceback.format_stack(frame)).strip() if frame is not None else ""
-            error = f"KeyboardInterrupt by user\n{stack}" if stack else "KeyboardInterrupt by user"
-            self.finish(state="aborted", error=error)
-        # 恢复原始 handler 并重新发送信号，让进程正常终止
-        signal.signal(signal.SIGINT, self._original_sigint_handler)
-        if self._original_sigint_handler is signal.SIG_IGN:
-            return  # Signal was ignored, do nothing.
-        if callable(self._original_sigint_handler):
-            self._original_sigint_handler(signum, frame)
-        else:
-            # The default handler (SIG_DFL) raises KeyboardInterrupt.
-            raise KeyboardInterrupt
+        pass
 
     def _handle_atexit(self) -> None:
         """程序正常退出时自动结束当前运行"""
-        if not self.alive:
-            return
-        console.debug("SwanLab Run is finishing at exit...")
-        self.finish()
+        pass
 
     def _handle_except(self, tp: Type[BaseException], val: BaseException, tb: Optional[TracebackType]) -> None:
         """全局异常捕获，将实验标记为 crashed 或 aborted"""
-        with safe.block(message="SwanLab failed to handle excepthook"):
-            if self.alive:
-                state: FinishType = "crashed"
-                if tp is KeyboardInterrupt:
-                    console.info("KeyboardInterrupt by user, aborting run...")
-                    state = "aborted"
-                else:
-                    console.info("Error happened while training")
-                full_error_msg = "".join(traceback.format_exception(tp, val, tb))
-                self.finish(state=state, error=full_error_msg)
-        self._sys_origin_excepthook(tp, val, tb)
+        pass
 
     # ----------------------------------
     # 公开辅助属性
@@ -211,8 +173,7 @@ class Run:
 
         :return: Run ID
         """
-        assert self._ctx.config.settings.run.id is not None, "Run id is not set."
-        return self._ctx.config.settings.run.id
+        pass
 
     @cached_property
     def mode(self) -> ModeType:
@@ -221,16 +182,14 @@ class Run:
 
         :return: Run mode
         """
-        assert self._ctx.config.settings.mode is not None, "Run mode is not set."
-        return self._ctx.config.settings.mode
+        pass
 
     @cached_property
     def name(self) -> str:
         """
         Current run name, equal to experiment name.
         """
-        assert self._ctx.config.settings.experiment.name is not None, "Experiment name is not set."
-        return self._ctx.config.settings.experiment.name
+        pass
 
     @cached_property
     def dir(self) -> Path:
@@ -239,8 +198,7 @@ class Run:
 
         :return: Run directory path
         """
-        assert self._ctx.run_dir is not None, "Run dir is not set."
-        return self._ctx.run_dir
+        pass
 
     @cached_property
     def path(self) -> str:
@@ -258,10 +216,7 @@ class Run:
         Current run URL if in cloud mode, otherwise None.
         :return: Run URL or None
         """
-        settings = self._ctx.config.settings
-        if settings.mode != "cloud":
-            return None
-        return f"{settings.web_host}/@{settings.project.workspace}{self.path}"
+        pass
 
     @cached_property
     def config(self) -> Config:
@@ -270,7 +225,7 @@ class Run:
     @property
     def _forked(self) -> bool:
         """当前进程是否为创建 Run 时的进程的 fork 子进程"""
-        return os.getpid() != self._pid
+        pass
 
     @property
     def _passive(self) -> bool:
@@ -278,7 +233,7 @@ class Run:
 
         当前 disabled 模式为被动模式，未来其他需要跳过运行时组件的模式也可复用此属性。
         """
-        return self.mode == "disabled"
+        pass
 
     @property
     def alive(self) -> bool:
@@ -286,7 +241,7 @@ class Run:
         If the run is alive. You can log metrics if the run is alive.
         :return: True if the run is alive, False otherwise
         """
-        return not self._forked and self._state == "running"
+        pass
 
     # ----------------------------------
     # 上下文管理器，允许用户以 with 语句启动和结束运行
@@ -440,7 +395,7 @@ class Run:
         :param value: The scalar value.
         :param step: Optional step for the scalar value.
         """
-        self.log({key: value}, step=step)
+        pass
 
     @with_api("run.log_text()")
     def log_text(self, *, key: str, data: TextDatasType, caption: CaptionsType = None, step: Optional[int] = None):

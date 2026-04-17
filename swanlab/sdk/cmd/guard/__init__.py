@@ -25,12 +25,7 @@ def with_cmd_lock(func):
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        global _CMD_LOCK, _CMD_PID
-        if os.getpid() != _CMD_PID:
-            _CMD_LOCK = threading.Lock()
-            _CMD_PID = os.getpid()
-        with _CMD_LOCK:
-            return func(*args, **kwargs)
+        pass
 
     return wrapper
 
@@ -45,9 +40,7 @@ def with_run(cmd: str):
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs):
-            if not has_run():
-                raise RuntimeError(f"`swanlab.{cmd}` requires an active Run, call `swanlab.init()` first.")
-            return func(*args, **kwargs)
+            pass
 
         return wrapper
 
@@ -62,9 +55,7 @@ def without_run(cmd: str):
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs):
-            if has_run():
-                raise RuntimeError(f"`swanlab.{cmd}` requires no active Run, call `swanlab.finish()` first.")
-            return func(*args, **kwargs)
+            pass
 
         return wrapper
 

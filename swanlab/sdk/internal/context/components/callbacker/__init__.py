@@ -37,13 +37,12 @@ class _CallbackManager:
 
     def remove_callback(self, name: str) -> None:
         """根据名称移除指定的回调函数"""
-        if name in self._callbacks:
-            del self._callbacks[name]
+        pass
 
     @property
     def registered_callbacks(self) -> List[Callback]:
         """返回当前所有已注册的回调列表"""
-        return list(self._callbacks.values())
+        pass
 
     # =========================================================================
     # 动态事件分发引擎 (Dynamic Event Dispatcher)
@@ -54,10 +53,7 @@ class _CallbackManager:
         if hasattr(Callback, name) and callable(getattr(Callback, name)):
             # 2. 动态生成带容错机制的代理函数
             def dispatcher(*args, **kwargs):
-                for cb in self._callbacks.values():
-                    # 从具体的回调实例中获取对应名称的方法并执行
-                    with safe.block(message=f"Error executing '{name}' in callback '{cb.name}'"):
-                        getattr(cb, name)(*args, **kwargs)
+                pass
 
             # 3. 性能优化：将生成好的代理函数缓存到当前实例上
             # 这样第二次调用 callbacker.on_log 时，就变成了普通的 O(1) 属性访问，性能极高！
@@ -77,7 +73,7 @@ if TYPE_CHECKING:
     class CallbackManager(_CallbackManager, Callback):
         @property
         def name(self) -> str:
-            return "FakeCallback"
+            pass
 
     callbacker: CallbackManager
 else:

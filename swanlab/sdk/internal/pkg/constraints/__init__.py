@@ -89,9 +89,7 @@ RunId = Annotated[
 
 
 def _no_dot_slash_edges(v: str) -> str:
-    if v.startswith((".", "/")) or v.endswith((".", "/")):
-        raise ValueError(f"Key '{v}' cannot start or end with '.' or '/'.")
-    return v
+    pass
 
 
 MetricKey = Annotated[

@@ -55,11 +55,11 @@ CONFIG_DIR: str = config_dir_env or "/etc/swanlab"
 
 def root_factory() -> Path:
     # 向下兼容旧版本环境变量
-    return Path(os.environ.get("SWANLAB_SAVE_DIR", str(Path.home() / ROOT_FOLDER)))
+    pass
 
 
 def log_dir_factory() -> Path:
-    return Path.cwd() / "swanlog"
+    pass
 
 
 class Settings(BaseSettings):
@@ -118,11 +118,7 @@ class Settings(BaseSettings):
 
     @field_validator("mode", mode="before")
     def validate_mode(cls, v: Any) -> ModeType:
-        if v in list(get_args(ModeType)):
-            return v
-        if v == "online":
-            return "cloud"
-        raise ValueError(f"Invalid mode: {v}, allowed values are {list(get_args(ModeType))}")
+        pass
 
     root: Path = Field(default_factory=root_factory)
     """
@@ -134,14 +130,7 @@ class Settings(BaseSettings):
         """
         如果 root 存在，必须是目录
         """
-        path_v = Path(v)
-
-        if path_v.exists() and not path_v.is_dir():
-            raise ValueError(
-                f"Root path {path_v} exists but is not a directory.",
-                "Please remove the file or choose a different path.",
-            )
-        return path_v
+        pass
 
     log_dir: Path = Field(default_factory=log_dir_factory, validate_default=True)
     """
@@ -155,9 +144,7 @@ class Settings(BaseSettings):
         """
         如果 log_dir 存在，必须是目录
         """
-        if Path(v).exists() and not Path(v).is_dir():
-            raise ValueError(f"Log directory {v} exists but is not a directory.")
-        return Path(v)
+        pass
 
     api_key: Optional[str] = Field(default=None)
     """
@@ -180,9 +167,7 @@ class Settings(BaseSettings):
         删除空值和空字典，以适配传入None的情况，一般情况下此校验必须在其他model_validator之前定义
         如果出现部分字段需要识别None值，则在此校验之前定义model_validator
         """
-        if isinstance(data, dict):
-            data = helper.strip_none(data)
-        return data
+        pass
 
     @model_validator(mode="before")
     @classmethod
@@ -192,25 +177,7 @@ class Settings(BaseSettings):
         在设计上，api_host 是最基础URL，但是有时候展示的前端URL和后端URL可能不一致
         所以在处理时，我们优先使用 api_host，然后根据需要（当没有显式配置 web_host 时）推导 web_host
         """
-        if isinstance(data, dict):
-            if "api_host" in data and data["api_host"]:
-                clean_api = nrc.fmt(str(data["api_host"]))
-                data["api_host"] = clean_api
-
-                # 当且仅当没有显式配置 web_host 时，自动推导 web_host
-                if "web_host" not in data:
-                    data["web_host"] = clean_api
-
-            # 清理 web_host：用 fmt 统一格式
-            if "web_host" in data and data["web_host"]:
-                clean_web = nrc.fmt(str(data["web_host"]))
-                # web_host 不允许等于 api_host 的默认值，自动回退为 web_host 的默认值
-                if clean_web == str(cls.model_fields["api_host"].default):
-                    data.pop("web_host", None)
-                    return data
-                data["web_host"] = clean_web
-
-        return data
+        pass
 
     @model_validator(mode="after")
     def load_api_key(self) -> "Settings":
@@ -228,36 +195,7 @@ class Settings(BaseSettings):
         - login (username) -> web_host
         - password -> api_key
         """
-        # 获取被显式设置过的字段集合（在 Env 或 Yaml 中指定过的字段，跳过覆盖）
-        fields_set = self.__pydantic_fields_set__
-        # 如果 api_key 已经被设置，则跳过
-        if "api_key" in fields_set:
-            return self
-        # api key, api host, web host
-        netrc_result: Optional[Tuple[str, str, str]] = None
-        with safe.block(
-            message="Failed to load credentials from current directory, falling back to root directory if available"
-        ):
-            netrc_result = _load_netrc(Path.cwd() / ROOT_FOLDER / ".netrc")
-        if netrc_result is None:
-            with safe.block(message="Failed to load credentials from root directory"):
-                netrc_result = _load_netrc(self.root / ".netrc")
-
-        if netrc_result is not None:
-            api_key, api_host, web_host = netrc_result
-            # 前提条件：读取到的 api_host 与当前配置的 api_host 匹配，或者 api_host 未被显式设置
-            # 如果用户显式设置了 api_host 但与 netrc 中存储的不一致，说明用户切换了环境，不应使用旧凭证
-            if "api_host" not in fields_set or self.api_host == api_host:
-                if "api_key" not in fields_set and api_key:
-                    object.__setattr__(self, "api_key", api_key)
-                    fields_set.add("api_key")
-                if "api_host" not in fields_set and api_host:
-                    object.__setattr__(self, "api_host", api_host)
-                    fields_set.add("api_host")
-                if "web_host" not in fields_set and web_host:
-                    object.__setattr__(self, "web_host", web_host)
-                    fields_set.add("web_host")
-        return self
+        pass
 
     project: ProjectSettings = Field(default_factory=ProjectSettings)
     """
@@ -320,41 +258,7 @@ class Settings(BaseSettings):
         # 5. file_secret_settings (容器 Secrets)
         # 6. env_settings (环境变量)
         # 7. 默认值 (Model Default)
-        sources = [init_settings]
-
-        # 5. 当前目录下 swanlab.{yaml,yml}
-        for ext in ["yaml", "yml"]:
-            local_file = Path(f"swanlab.{ext}")
-            if local_file.exists():
-                sources.append(YamlConfigSettingsSource(settings_cls, yaml_file=local_file))
-
-        # 4. /etc/swanlab/*.{yaml,yml}
-        etc_dir = Path(CONFIG_DIR)
-        if etc_dir.exists() and etc_dir.is_dir():
-            etc_files = sorted(list(etc_dir.glob("*.yaml")) + list(etc_dir.glob("*.yml")), reverse=True)
-            for file in etc_files:
-                sources.append(YamlConfigSettingsSource(settings_cls, yaml_file=file))
-
-        # 3. .env 文件
-        sources.append(dotenv_settings)
-
-        # file_secret_settings (Secrets 文件)
-        # 对于Secrets文件，不需要额外的前缀，直接使用默认的环境变量前缀
-        secrets_dir = settings_cls.model_config.get("secrets_dir")
-        if secrets_dir:
-            custom_secret_source = SecretsSettingsSource(
-                settings_cls,
-                secrets_dir=secrets_dir,
-                env_prefix="",
-            )
-            sources.append(custom_secret_source)
-        # 优先级高于普通环境变量，防止敏感信息被低优先级的 Env 覆盖
-        sources.append(file_secret_settings)
-
-        # 2. 环境变量
-        sources.append(env_settings)
-
-        return tuple(sources)
+        pass
 
     def merge_settings(self, other: Union["Settings", dict]) -> None:
         """
@@ -400,9 +304,7 @@ def _deep_update(base_dict: dict, update_dict: dict) -> dict:
 
 
 def _load_netrc(netrc_path: Path) -> Optional[Tuple[str, str, str]]:
-    if netrc_path.exists() and netrc_path.is_file():
-        return nrc.read(netrc_path)
-    return None
+    pass
 
 
 settings = Settings()

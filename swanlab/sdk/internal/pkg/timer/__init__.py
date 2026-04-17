@@ -97,53 +97,24 @@ class Timer:
         """
         已完成执行次数。
         """
-        return self._count
+        pass
 
     @property
     def is_running(self) -> bool:
         """
         当前后台线程是否仍在运行。
         """
-        with self._lock:
-            return self._thread is not None and self._thread.is_alive()
+        pass
 
     def _loop(self) -> None:
-        if self._immediate and not self._stop_event.is_set():
-            self._execute_once()
-
-        while not self._stop_event.is_set():
-            # noinspection PyBroadException
-            try:
-                sleep_time = self._resolve_interval()
-            except Exception:
-                console.trace("Timer interval strategy error")
-                self._stop_event.set()
-                return
-
-            if self._stop_event.wait(sleep_time):
-                return
-
-            self._execute_once()
+        pass
 
     def _execute_once(self) -> None:
-        with safe.block(message="Error executing task"):
-            self._task()
-        # safe block 确保任务无论是否异常，都计数
-        self._count += 1
+        pass
 
     def _resolve_interval(self) -> float:
-        interval = self._interval
-        if callable(interval):
-            interval = interval(self._count)
-        return self._normalize_interval(interval)
+        pass
 
     @staticmethod
     def _normalize_interval(interval: Union[int, float]) -> float:
-        if isinstance(interval, bool):
-            raise TypeError("Timer interval must be a positive number, not bool.")
-
-        value = float(interval)
-        if value <= 0:
-            raise ValueError(f"Timer interval must be greater than 0, got {interval!r}.")
-
-        return value
+        pass

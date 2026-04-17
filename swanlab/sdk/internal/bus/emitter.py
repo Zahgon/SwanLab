@@ -38,7 +38,7 @@ class RunEmitter(EmitterProtocol):
     @property
     def queue(self) -> RunQueue:
         """只读暴露给 BackgroundConsumer，外部不应直接操作队列"""
-        return self._queue
+        pass
 
     def emit(self, event: EventPayload) -> None:
         """将事件推入队列，背压时阻塞调用方"""

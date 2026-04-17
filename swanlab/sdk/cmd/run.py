@@ -25,7 +25,7 @@ def _make_run_cmd(method_name: str) -> Callable:
     @with_cmd_lock
     @with_run(method_name)
     def wrapper(*args: Any, **kwargs: Any) -> Any:
-        return getattr(get_run(), method_name)(*args, **kwargs)
+        pass
 
     wrapper.__name__ = method_name
     wrapper.__wrapped__ = run_method  # type: ignore[attr-defined]

@@ -61,13 +61,11 @@ class MemorySnapshot(BaseModel):
     @field_validator("total_unit", mode="before")
     @classmethod
     def normalize_unit(cls, v: Optional[str]) -> Optional[str]:
-        return v.upper() if v else None
+        pass
 
     @model_validator(mode="after")
     def validate_unit_dependency(self) -> "MemorySnapshot":
-        if (self.total is None) != (self.total_unit is None):
-            raise ValueError("total and total_unit must both be None or both be provided")
-        return self
+        pass
 
     model_config = ConfigDict(frozen=True)
 
@@ -87,13 +85,11 @@ class DeviceSnapshot(BaseModel):
     @field_validator("memory_unit", mode="before")
     @classmethod
     def normalize_unit(cls, v: Optional[str]) -> Optional[str]:
-        return v.upper() if v else None
+        pass
 
     @model_validator(mode="after")
     def validate_unit_dependency(self) -> "DeviceSnapshot":
-        if (self.memory is None) != (self.memory_unit is None):
-            raise ValueError("memory and memory_unit must both be None or both be provided")
-        return self
+        pass
 
     model_config = ConfigDict(frozen=True)
 
@@ -135,13 +131,11 @@ class AppleSiliconSnapshot(BaseModel):
     @field_validator("memory_unit", mode="before")
     @classmethod
     def normalize_unit(cls, v: Optional[str]) -> Optional[str]:
-        return v.upper() if v else None
+        pass
 
     @model_validator(mode="after")
     def validate_unit_dependency(self) -> "AppleSiliconSnapshot":
-        if (self.memory is None) != (self.memory_unit is None):
-            raise ValueError("memory and memory_unit must both be None or both be provided")
-        return self
+        pass
 
     model_config = ConfigDict(frozen=True)
 

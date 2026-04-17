@@ -68,8 +68,7 @@ class MediaMetric:
     _step: int = -1
 
     def next(self):
-        self._step += 1
-        return self._step
+        pass
 
 
 # 指标状态，实验运行过程中不断更新

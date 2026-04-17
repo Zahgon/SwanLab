@@ -54,13 +54,7 @@ def decorator(
 
         @wraps(func)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> Optional[R]:
-            try:
-                return func(*args, **kwargs)
-            except catch_types as e:
-                if message is not None:
-                    console.trace(message, write_to_file=write, level_name=level)
-                if on_error is not None:
-                    on_error(e)
+            pass
 
         return wrapper
 
